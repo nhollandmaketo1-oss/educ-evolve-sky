@@ -1,12 +1,12 @@
-// Simple localStorage-based data store for EDUC 2.0
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Student {
   id: string;
   nom: string;
   prenom: string;
   classe: string;
-  contactParent: string;
-  dateInscription: string;
+  contact_parent: string | null;
+  date_inscription: string;
   status: "actif" | "inactif";
 }
 
@@ -15,14 +15,14 @@ export interface Personnel {
   nom: string;
   prenom: string;
   type: "enseignant" | "surveillant";
-  matiere?: string;
+  matiere: string | null;
   salaire: number;
-  telephone: string;
+  telephone: string | null;
 }
 
 export interface Payment {
   id: string;
-  studentId: string;
+  student_id: string;
   montant: number;
   date: string;
   mois: string;
@@ -31,7 +31,7 @@ export interface Payment {
 
 export interface Attendance {
   id: string;
-  personnelId: string;
+  personnel_id: string;
   date: string;
   heure: string;
   present: boolean;
@@ -40,95 +40,115 @@ export interface Attendance {
 export interface Notification {
   id: string;
   message: string;
-  date: string;
+  created_at: string;
   read: boolean;
-  targetRole: "dg" | "de" | "gestionnaire" | "all";
+  target_role: string;
 }
 
-const CLASSES = [
+export interface Grade {
+  id: string;
+  student_id: string;
+  matiere: string;
+  note: number;
+  coefficient: number;
+  trimestre: number;
+  annee_scolaire: string;
+  commentaire: string | null;
+}
+
+export const CLASSES = [
   "CP1", "CP2", "CE1", "CE2", "CM1", "CM2",
   "6ème", "5ème", "4ème", "3ème",
   "2nde", "1ère", "Terminale"
 ];
 
-const MATIERES = [
+export const MATIERES = [
   "Français", "Mathématiques", "Anglais", "Physique-Chimie",
   "SVT", "Histoire-Géographie", "Philosophie", "EPS",
   "Informatique", "Éducation Civique", "Dessin", "Musique"
 ];
 
-export { CLASSES, MATIERES };
-
-function get<T>(key: string, fallback: T[] = []): T[] {
-  const d = localStorage.getItem(`educ_${key}`);
-  return d ? JSON.parse(d) : fallback;
-}
-
-function set<T>(key: string, data: T[]) {
-  localStorage.setItem(`educ_${key}`, JSON.stringify(data));
-}
-
 // Students
-export function getStudents(): Student[] { return get<Student>("students"); }
-export function addStudent(s: Omit<Student, "id">): Student {
-  const students = getStudents();
-  const newS: Student = { ...s, id: String(Date.now()) };
-  students.push(newS);
-  set("students", students);
+export async function getStudents(): Promise<Student[]> {
+  const { data } = await supabase.from("students").select("*").order("created_at", { ascending: false });
+  return (data || []) as Student[];
+}
+
+export async function addStudent(s: Omit<Student, "id">): Promise<Student | null> {
+  const { data, error } = await supabase.from("students").insert({
+    nom: s.nom, prenom: s.prenom, classe: s.classe,
+    contact_parent: s.contact_parent, status: s.status,
+  }).select().maybeSingle();
+  if (error || !data) return null;
   // Add notification
-  addNotification({
-    message: `Nouvel élève inscrit: ${s.prenom} ${s.nom} en ${s.classe}`,
-    date: new Date().toISOString(),
-    read: false,
-    targetRole: "dg",
-  });
-  return newS;
+  await addNotification({ message: `Nouvel élève inscrit: ${s.prenom} ${s.nom} en ${s.classe}`, target_role: "dg", read: false });
+  return data as Student;
 }
 
 // Personnel
-export function getPersonnel(): Personnel[] { return get<Personnel>("personnel"); }
-export function addPersonnel(p: Omit<Personnel, "id">): Personnel {
-  const list = getPersonnel();
-  const newP: Personnel = { ...p, id: String(Date.now()) };
-  list.push(newP);
-  set("personnel", list);
-  return newP;
+export async function getPersonnel(): Promise<Personnel[]> {
+  const { data } = await supabase.from("personnel").select("*").order("created_at", { ascending: false });
+  return (data || []) as Personnel[];
+}
+
+export async function addPersonnel(p: Omit<Personnel, "id">): Promise<Personnel | null> {
+  const { data } = await supabase.from("personnel").insert({
+    nom: p.nom, prenom: p.prenom, type: p.type,
+    matiere: p.matiere, salaire: p.salaire, telephone: p.telephone,
+  }).select().maybeSingle();
+  return (data || null) as Personnel | null;
 }
 
 // Payments
-export function getPayments(): Payment[] { return get<Payment>("payments"); }
-export function addPayment(p: Omit<Payment, "id">): Payment {
-  const list = getPayments();
-  const newP: Payment = { ...p, id: String(Date.now()) };
-  list.push(newP);
-  set("payments", list);
-  return newP;
+export async function getPayments(): Promise<Payment[]> {
+  const { data } = await supabase.from("payments").select("*").order("date", { ascending: false });
+  return (data || []) as Payment[];
+}
+
+export async function addPayment(p: Omit<Payment, "id">): Promise<Payment | null> {
+  const { data } = await supabase.from("payments").insert({
+    student_id: p.student_id, montant: p.montant, mois: p.mois, status: p.status,
+  }).select().maybeSingle();
+  return (data || null) as Payment | null;
 }
 
 // Attendance
-export function getAttendance(): Attendance[] { return get<Attendance>("attendance"); }
-export function addAttendance(a: Omit<Attendance, "id">): Attendance {
-  const list = getAttendance();
-  const newA: Attendance = { ...a, id: String(Date.now()) };
-  list.push(newA);
-  set("attendance", list);
-  return newA;
+export async function getAttendance(): Promise<Attendance[]> {
+  const { data } = await supabase.from("attendance").select("*").order("date", { ascending: false });
+  return (data || []) as Attendance[];
 }
-export function setAttendanceBulk(records: Omit<Attendance, "id">[]) {
-  const list = getAttendance();
-  const newRecords = records.map(r => ({ ...r, id: String(Date.now() + Math.random()) }));
-  set("attendance", [...list, ...newRecords]);
+
+export async function addAttendanceBulk(records: Omit<Attendance, "id">[]) {
+  await supabase.from("attendance").insert(records.map((r) => ({
+    personnel_id: r.personnel_id, date: r.date, heure: r.heure, present: r.present,
+  })));
 }
 
 // Notifications
-export function getNotifications(): Notification[] { return get<Notification>("notifications"); }
-export function addNotification(n: Omit<Notification, "id">) {
-  const list = getNotifications();
-  list.unshift({ ...n, id: String(Date.now()) });
-  set("notifications", list);
+export async function getNotifications(): Promise<Notification[]> {
+  const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(20);
+  return (data || []) as Notification[];
 }
-export function markNotificationRead(id: string) {
-  const list = getNotifications();
-  const idx = list.findIndex(n => n.id === id);
-  if (idx !== -1) { list[idx].read = true; set("notifications", list); }
+
+export async function addNotification(n: Omit<Notification, "id" | "created_at">) {
+  await supabase.from("notifications").insert({ message: n.message, target_role: n.target_role, read: n.read });
+}
+
+export async function markNotificationRead(id: string) {
+  await supabase.from("notifications").update({ read: true }).eq("id", id);
+}
+
+// Grades
+export async function getGrades(): Promise<Grade[]> {
+  const { data } = await supabase.from("grades").select("*").order("created_at", { ascending: false });
+  return (data || []) as Grade[];
+}
+
+export async function addGrade(g: Omit<Grade, "id">): Promise<Grade | null> {
+  const { data } = await supabase.from("grades").insert({
+    student_id: g.student_id, matiere: g.matiere, note: g.note,
+    coefficient: g.coefficient, trimestre: g.trimestre,
+    annee_scolaire: g.annee_scolaire, commentaire: g.commentaire,
+  }).select().maybeSingle();
+  return (data || null) as Grade | null;
 }

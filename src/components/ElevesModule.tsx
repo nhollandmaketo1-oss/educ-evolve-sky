@@ -1,19 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getStudents, addStudent, CLASSES, type Student } from "@/lib/store";
 import { Plus, X } from "lucide-react";
 
 export function ElevesModule() {
-  const [students, setStudents] = useState<Student[]>(getStudents());
+  const [students, setStudents] = useState<Student[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nom: "", prenom: "", classe: CLASSES[0], contactParent: "" });
+  const [form, setForm] = useState({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "" });
   const [filterClasse, setFilterClasse] = useState("all");
 
-  const handleAdd = (e: React.FormEvent) => {
+  useEffect(() => { getStudents().then(setStudents); }, []);
+
+  const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nom || !form.prenom) return;
-    addStudent({ ...form, dateInscription: new Date().toISOString(), status: "actif" });
-    setStudents(getStudents());
-    setForm({ nom: "", prenom: "", classe: CLASSES[0], contactParent: "" });
+    await addStudent({ ...form, date_inscription: new Date().toISOString(), status: "actif" });
+    setStudents(await getStudents());
+    setForm({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "" });
     setShowForm(false);
   };
 
@@ -27,14 +29,10 @@ export function ElevesModule() {
           <Plus className="w-4 h-4" /> Inscrire un élève
         </button>
       </div>
-
-      <div className="flex gap-2 flex-wrap">
-        <select value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)} className="px-3 py-2 rounded-xl bg-input text-foreground text-sm border border-border">
-          <option value="all">Toutes les classes</option>
-          {CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
-        </select>
-      </div>
-
+      <select value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)} className="px-3 py-2 rounded-xl bg-input text-foreground text-sm border border-border">
+        <option value="all">Toutes les classes</option>
+        {CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
+      </select>
       {showForm && (
         <div className="fixed inset-0 bg-foreground/30 z-50 flex items-center justify-center p-4">
           <div className="bg-card rounded-2xl p-6 w-full max-w-md shadow-xl">
@@ -48,26 +46,23 @@ export function ElevesModule() {
               <select value={form.classe} onChange={(e) => setForm({ ...form, classe: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border">
                 {CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-              <input placeholder="Contact parent" value={form.contactParent} onChange={(e) => setForm({ ...form, contactParent: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
+              <input placeholder="Contact parent" value={form.contact_parent} onChange={(e) => setForm({ ...form, contact_parent: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
               <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90">Inscrire</button>
             </form>
           </div>
         </div>
       )}
-
       <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-secondary text-muted-foreground">
-                <th className="text-left px-4 py-3 font-medium">Nom</th>
-                <th className="text-left px-4 py-3 font-medium">Prénom</th>
-                <th className="text-left px-4 py-3 font-medium">Classe</th>
-                <th className="text-left px-4 py-3 font-medium">Contact</th>
-                <th className="text-left px-4 py-3 font-medium">Date</th>
-                <th className="text-left px-4 py-3 font-medium">Statut</th>
-              </tr>
-            </thead>
+            <thead><tr className="bg-secondary text-muted-foreground">
+              <th className="text-left px-4 py-3 font-medium">Nom</th>
+              <th className="text-left px-4 py-3 font-medium">Prénom</th>
+              <th className="text-left px-4 py-3 font-medium">Classe</th>
+              <th className="text-left px-4 py-3 font-medium">Contact</th>
+              <th className="text-left px-4 py-3 font-medium">Date</th>
+              <th className="text-left px-4 py-3 font-medium">Statut</th>
+            </tr></thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Aucun élève inscrit</td></tr>
@@ -76,12 +71,10 @@ export function ElevesModule() {
                   <td className="px-4 py-3 font-medium">{s.nom}</td>
                   <td className="px-4 py-3">{s.prenom}</td>
                   <td className="px-4 py-3">{s.classe}</td>
-                  <td className="px-4 py-3">{s.contactParent}</td>
-                  <td className="px-4 py-3 text-muted-foreground">{new Date(s.dateInscription).toLocaleDateString("fr-FR")}</td>
+                  <td className="px-4 py-3">{s.contact_parent}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{new Date(s.date_inscription).toLocaleDateString("fr-FR")}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.status === "actif" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
-                      {s.status}
-                    </span>
+                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.status === "actif" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>{s.status}</span>
                   </td>
                 </tr>
               ))}

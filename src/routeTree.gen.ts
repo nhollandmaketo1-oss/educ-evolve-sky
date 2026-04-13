@@ -17,6 +17,7 @@ import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PresencesRouteImport } from './routes/presences'
 import { Route as PersonnelRouteImport } from './routes/personnel'
 import { Route as PaiementsRouteImport } from './routes/paiements'
+import { Route as NotesRouteImport } from './routes/notes'
 import { Route as ElevesRouteImport } from './routes/eleves'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -60,6 +61,11 @@ const PaiementsRoute = PaiementsRouteImport.update({
   path: '/paiements',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotesRoute = NotesRouteImport.update({
+  id: '/notes',
+  path: '/notes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ElevesRoute = ElevesRouteImport.update({
   id: '/eleves',
   path: '/eleves',
@@ -74,6 +80,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/eleves': typeof ElevesRoute
+  '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/eleves': typeof ElevesRoute
+  '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/eleves': typeof ElevesRoute
+  '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/eleves'
+    | '/notes'
     | '/paiements'
     | '/personnel'
     | '/presences'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/eleves'
+    | '/notes'
     | '/paiements'
     | '/personnel'
     | '/presences'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/eleves'
+    | '/notes'
     | '/paiements'
     | '/personnel'
     | '/presences'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ElevesRoute: typeof ElevesRoute
+  NotesRoute: typeof NotesRoute
   PaiementsRoute: typeof PaiementsRoute
   PersonnelRoute: typeof PersonnelRoute
   PresencesRoute: typeof PresencesRoute
@@ -218,6 +231,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaiementsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notes': {
+      id: '/notes'
+      path: '/notes'
+      fullPath: '/notes'
+      preLoaderRoute: typeof NotesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/eleves': {
       id: '/eleves'
       path: '/eleves'
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ElevesRoute: ElevesRoute,
+  NotesRoute: NotesRoute,
   PaiementsRoute: PaiementsRoute,
   PersonnelRoute: PersonnelRoute,
   PresencesRoute: PresencesRoute,
