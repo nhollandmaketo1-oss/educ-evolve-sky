@@ -41,8 +41,6 @@ export function getCurrentUser(): AppUser | null {
   const users = getUsers();
   return users.find((u) => u.id === userId) || null;
 }
-  return users.find((u) => u.id === userId) || null;
-}
 
 export function loginUser(user: AppUser) {
   if (typeof window === "undefined") return;
