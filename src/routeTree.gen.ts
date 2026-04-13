@@ -9,8 +9,62 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UtilisateursRouteImport } from './routes/utilisateurs'
+import { Route as StatistiquesRouteImport } from './routes/statistiques'
+import { Route as SalairesRouteImport } from './routes/salaires'
+import { Route as RapportsRouteImport } from './routes/rapports'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PresencesRouteImport } from './routes/presences'
+import { Route as PersonnelRouteImport } from './routes/personnel'
+import { Route as PaiementsRouteImport } from './routes/paiements'
+import { Route as ElevesRouteImport } from './routes/eleves'
 import { Route as IndexRouteImport } from './routes/index'
 
+const UtilisateursRoute = UtilisateursRouteImport.update({
+  id: '/utilisateurs',
+  path: '/utilisateurs',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatistiquesRoute = StatistiquesRouteImport.update({
+  id: '/statistiques',
+  path: '/statistiques',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SalairesRoute = SalairesRouteImport.update({
+  id: '/salaires',
+  path: '/salaires',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RapportsRoute = RapportsRouteImport.update({
+  id: '/rapports',
+  path: '/rapports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PresencesRoute = PresencesRouteImport.update({
+  id: '/presences',
+  path: '/presences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PersonnelRoute = PersonnelRouteImport.update({
+  id: '/personnel',
+  path: '/personnel',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaiementsRoute = PaiementsRouteImport.update({
+  id: '/paiements',
+  path: '/paiements',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ElevesRoute = ElevesRouteImport.update({
+  id: '/eleves',
+  path: '/eleves',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -19,28 +73,158 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/eleves': typeof ElevesRoute
+  '/paiements': typeof PaiementsRoute
+  '/personnel': typeof PersonnelRoute
+  '/presences': typeof PresencesRoute
+  '/profil': typeof ProfilRoute
+  '/rapports': typeof RapportsRoute
+  '/salaires': typeof SalairesRoute
+  '/statistiques': typeof StatistiquesRoute
+  '/utilisateurs': typeof UtilisateursRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/eleves': typeof ElevesRoute
+  '/paiements': typeof PaiementsRoute
+  '/personnel': typeof PersonnelRoute
+  '/presences': typeof PresencesRoute
+  '/profil': typeof ProfilRoute
+  '/rapports': typeof RapportsRoute
+  '/salaires': typeof SalairesRoute
+  '/statistiques': typeof StatistiquesRoute
+  '/utilisateurs': typeof UtilisateursRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/eleves': typeof ElevesRoute
+  '/paiements': typeof PaiementsRoute
+  '/personnel': typeof PersonnelRoute
+  '/presences': typeof PresencesRoute
+  '/profil': typeof ProfilRoute
+  '/rapports': typeof RapportsRoute
+  '/salaires': typeof SalairesRoute
+  '/statistiques': typeof StatistiquesRoute
+  '/utilisateurs': typeof UtilisateursRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/eleves'
+    | '/paiements'
+    | '/personnel'
+    | '/presences'
+    | '/profil'
+    | '/rapports'
+    | '/salaires'
+    | '/statistiques'
+    | '/utilisateurs'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/eleves'
+    | '/paiements'
+    | '/personnel'
+    | '/presences'
+    | '/profil'
+    | '/rapports'
+    | '/salaires'
+    | '/statistiques'
+    | '/utilisateurs'
+  id:
+    | '__root__'
+    | '/'
+    | '/eleves'
+    | '/paiements'
+    | '/personnel'
+    | '/presences'
+    | '/profil'
+    | '/rapports'
+    | '/salaires'
+    | '/statistiques'
+    | '/utilisateurs'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ElevesRoute: typeof ElevesRoute
+  PaiementsRoute: typeof PaiementsRoute
+  PersonnelRoute: typeof PersonnelRoute
+  PresencesRoute: typeof PresencesRoute
+  ProfilRoute: typeof ProfilRoute
+  RapportsRoute: typeof RapportsRoute
+  SalairesRoute: typeof SalairesRoute
+  StatistiquesRoute: typeof StatistiquesRoute
+  UtilisateursRoute: typeof UtilisateursRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/utilisateurs': {
+      id: '/utilisateurs'
+      path: '/utilisateurs'
+      fullPath: '/utilisateurs'
+      preLoaderRoute: typeof UtilisateursRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/statistiques': {
+      id: '/statistiques'
+      path: '/statistiques'
+      fullPath: '/statistiques'
+      preLoaderRoute: typeof StatistiquesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/salaires': {
+      id: '/salaires'
+      path: '/salaires'
+      fullPath: '/salaires'
+      preLoaderRoute: typeof SalairesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rapports': {
+      id: '/rapports'
+      path: '/rapports'
+      fullPath: '/rapports'
+      preLoaderRoute: typeof RapportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/presences': {
+      id: '/presences'
+      path: '/presences'
+      fullPath: '/presences'
+      preLoaderRoute: typeof PresencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/personnel': {
+      id: '/personnel'
+      path: '/personnel'
+      fullPath: '/personnel'
+      preLoaderRoute: typeof PersonnelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paiements': {
+      id: '/paiements'
+      path: '/paiements'
+      fullPath: '/paiements'
+      preLoaderRoute: typeof PaiementsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/eleves': {
+      id: '/eleves'
+      path: '/eleves'
+      fullPath: '/eleves'
+      preLoaderRoute: typeof ElevesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -53,6 +237,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ElevesRoute: ElevesRoute,
+  PaiementsRoute: PaiementsRoute,
+  PersonnelRoute: PersonnelRoute,
+  PresencesRoute: PresencesRoute,
+  ProfilRoute: ProfilRoute,
+  RapportsRoute: RapportsRoute,
+  SalairesRoute: SalairesRoute,
+  StatistiquesRoute: StatistiquesRoute,
+  UtilisateursRoute: UtilisateursRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
