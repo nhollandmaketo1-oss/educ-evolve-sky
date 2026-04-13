@@ -14,7 +14,240 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      app_users: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          password: string
+          photo: string | null
+          role: string
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id?: string
+          password: string
+          photo?: string | null
+          role: string
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          password?: string
+          photo?: string | null
+          role?: string
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          date: string
+          heure: string
+          id: string
+          personnel_id: string
+          present: boolean
+        }
+        Insert: {
+          date: string
+          heure: string
+          id?: string
+          personnel_id: string
+          present?: boolean
+        }
+        Update: {
+          date?: string
+          heure?: string
+          id?: string
+          personnel_id?: string
+          present?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_personnel_id_fkey"
+            columns: ["personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      grades: {
+        Row: {
+          annee_scolaire: string
+          coefficient: number
+          commentaire: string | null
+          created_at: string
+          id: string
+          matiere: string
+          note: number
+          student_id: string
+          trimestre: number
+        }
+        Insert: {
+          annee_scolaire?: string
+          coefficient?: number
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          matiere: string
+          note: number
+          student_id: string
+          trimestre: number
+        }
+        Update: {
+          annee_scolaire?: string
+          coefficient?: number
+          commentaire?: string | null
+          created_at?: string
+          id?: string
+          matiere?: string
+          note?: number
+          student_id?: string
+          trimestre?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "grades_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          target_role: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          read?: boolean
+          target_role?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          target_role?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          date: string
+          id: string
+          mois: string
+          montant: number
+          status: string
+          student_id: string
+        }
+        Insert: {
+          date?: string
+          id?: string
+          mois: string
+          montant: number
+          status?: string
+          student_id: string
+        }
+        Update: {
+          date?: string
+          id?: string
+          mois?: string
+          montant?: number
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      personnel: {
+        Row: {
+          created_at: string
+          id: string
+          matiere: string | null
+          nom: string
+          prenom: string
+          salaire: number
+          telephone: string | null
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          matiere?: string | null
+          nom: string
+          prenom: string
+          salaire?: number
+          telephone?: string | null
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          matiere?: string | null
+          nom?: string
+          prenom?: string
+          salaire?: number
+          telephone?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          classe: string
+          contact_parent: string | null
+          created_at: string
+          date_inscription: string
+          id: string
+          nom: string
+          prenom: string
+          status: string
+        }
+        Insert: {
+          classe: string
+          contact_parent?: string | null
+          created_at?: string
+          date_inscription?: string
+          id?: string
+          nom: string
+          prenom: string
+          status?: string
+        }
+        Update: {
+          classe?: string
+          contact_parent?: string | null
+          created_at?: string
+          date_inscription?: string
+          id?: string
+          nom?: string
+          prenom?: string
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
