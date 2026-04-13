@@ -1,3 +1,5 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export type UserRole = "dg" | "de" | "gestionnaire";
 
 export interface AppUser {
@@ -5,72 +7,73 @@ export interface AppUser {
   username: string;
   password: string;
   role: UserRole;
-  displayName: string;
-  photo?: string;
+  display_name: string;
+  photo?: string | null;
 }
 
-const DEFAULT_USERS: AppUser[] = [
-  { id: "1", username: "DG001", password: "1234", role: "dg", displayName: "Directeur Général" },
-  { id: "2", username: "DE002", password: "0304", role: "de", displayName: "Directeur d'Études" },
-  { id: "3", username: "GES003", password: "1306", role: "gestionnaire", displayName: "Gestionnaire" },
-];
+// Session stored in memory (client-side only)
+let currentUserId: string | null = null;
 
-function getUsers(): AppUser[] {
-  if (typeof window === "undefined") return DEFAULT_USERS;
-  const stored = localStorage.getItem("educ_users");
-  if (stored) return JSON.parse(stored);
-  localStorage.setItem("educ_users", JSON.stringify(DEFAULT_USERS));
-  return DEFAULT_USERS;
-}
-
-function saveUsers(users: AppUser[]) {
+export function initSession() {
   if (typeof window === "undefined") return;
-  localStorage.setItem("educ_users", JSON.stringify(users));
+  currentUserId = sessionStorage.getItem("educ_current_user");
 }
 
-export function authenticate(username: string, password: string): AppUser | null {
-  const users = getUsers();
-  return users.find((u) => u.username === username && u.password === password) || null;
+export async function authenticate(username: string, password: string): Promise<AppUser | null> {
+  const { data, error } = await supabase
+    .from("app_users")
+    .select("*")
+    .eq("username", username)
+    .eq("password", password)
+    .maybeSingle();
+  if (error || !data) return null;
+  return mapUser(data);
 }
 
-export function getCurrentUser(): AppUser | null {
+export async function getCurrentUserAsync(): Promise<AppUser | null> {
   if (typeof window === "undefined") return null;
-  const stored = localStorage.getItem("educ_current_user");
-  if (!stored) return null;
-  const userId = JSON.parse(stored);
-  const users = getUsers();
-  return users.find((u) => u.id === userId) || null;
+  if (!currentUserId) {
+    currentUserId = sessionStorage.getItem("educ_current_user");
+  }
+  if (!currentUserId) return null;
+  const { data } = await supabase.from("app_users").select("*").eq("id", currentUserId).maybeSingle();
+  if (!data) return null;
+  return mapUser(data);
+}
+
+export function getCurrentUserId(): string | null {
+  if (typeof window === "undefined") return null;
+  if (!currentUserId) currentUserId = sessionStorage.getItem("educ_current_user");
+  return currentUserId;
 }
 
 export function loginUser(user: AppUser) {
   if (typeof window === "undefined") return;
-  localStorage.setItem("educ_current_user", JSON.stringify(user.id));
+  currentUserId = user.id;
+  sessionStorage.setItem("educ_current_user", user.id);
 }
 
 export function logoutUser() {
   if (typeof window === "undefined") return;
-  localStorage.removeItem("educ_current_user");
+  currentUserId = null;
+  sessionStorage.removeItem("educ_current_user");
 }
 
-export function updateUser(userId: string, updates: Partial<Pick<AppUser, "username" | "password" | "displayName" | "photo">>): AppUser {
-  const users = getUsers();
-  const idx = users.findIndex((u) => u.id === userId);
-  if (idx === -1) throw new Error("User not found");
-  users[idx] = { ...users[idx], ...updates };
-  saveUsers(users);
-  return users[idx];
+export async function updateUser(userId: string, updates: { username?: string; password?: string; display_name?: string; photo?: string }): Promise<AppUser | null> {
+  const { data, error } = await supabase.from("app_users").update(updates).eq("id", userId).select().maybeSingle();
+  if (error || !data) return null;
+  return mapUser(data);
 }
 
-export function getAllUsers(): AppUser[] {
-  return getUsers();
+export async function getAllUsers(): Promise<AppUser[]> {
+  const { data } = await supabase.from("app_users").select("*").order("created_at");
+  return (data || []).map(mapUser);
 }
 
-export function createUser(user: Omit<AppUser, "id">): AppUser {
-  const users = getUsers();
-  const newUser: AppUser = { ...user, id: String(Date.now()) };
-  users.push(newUser);
-  saveUsers(users);
-  return newUser;
+export async function createUser(user: { username: string; password: string; display_name: string; role: UserRole }): Promise<AppUser | null> {
+  const { data, error } = await supabase.from("app_users").insert(user).select().maybeSingle();
+  if (error || !data) return null;
+  return mapUser(data);
 }
 
 export function getRoleLabel(role: UserRole): string {
@@ -79,4 +82,15 @@ export function getRoleLabel(role: UserRole): string {
     case "de": return "Directeur d'Études";
     case "gestionnaire": return "Gestionnaire";
   }
+}
+
+function mapUser(row: Record<string, unknown>): AppUser {
+  return {
+    id: row.id as string,
+    username: row.username as string,
+    password: row.password as string,
+    role: row.role as UserRole,
+    display_name: row.display_name as string,
+    photo: row.photo as string | null,
+  };
 }
