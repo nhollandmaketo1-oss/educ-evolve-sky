@@ -16,6 +16,7 @@ const DEFAULT_USERS: AppUser[] = [
 ];
 
 function getUsers(): AppUser[] {
+  if (typeof window === "undefined") return DEFAULT_USERS;
   const stored = localStorage.getItem("educ_users");
   if (stored) return JSON.parse(stored);
   localStorage.setItem("educ_users", JSON.stringify(DEFAULT_USERS));
@@ -23,6 +24,7 @@ function getUsers(): AppUser[] {
 }
 
 function saveUsers(users: AppUser[]) {
+  if (typeof window === "undefined") return;
   localStorage.setItem("educ_users", JSON.stringify(users));
 }
 
@@ -32,18 +34,23 @@ export function authenticate(username: string, password: string): AppUser | null
 }
 
 export function getCurrentUser(): AppUser | null {
+  if (typeof window === "undefined") return null;
   const stored = localStorage.getItem("educ_current_user");
   if (!stored) return null;
   const userId = JSON.parse(stored);
   const users = getUsers();
   return users.find((u) => u.id === userId) || null;
 }
+  return users.find((u) => u.id === userId) || null;
+}
 
 export function loginUser(user: AppUser) {
+  if (typeof window === "undefined") return;
   localStorage.setItem("educ_current_user", JSON.stringify(user.id));
 }
 
 export function logoutUser() {
+  if (typeof window === "undefined") return;
   localStorage.removeItem("educ_current_user");
 }
 
