@@ -21,7 +21,9 @@ export type Database = {
           id: string
           password: string
           photo: string | null
+          poste: string | null
           role: string
+          telephone: string | null
           updated_at: string
           username: string
         }
@@ -31,7 +33,9 @@ export type Database = {
           id?: string
           password: string
           photo?: string | null
+          poste?: string | null
           role: string
+          telephone?: string | null
           updated_at?: string
           username: string
         }
@@ -41,7 +45,9 @@ export type Database = {
           id?: string
           password?: string
           photo?: string | null
+          poste?: string | null
           role?: string
+          telephone?: string | null
           updated_at?: string
           username?: string
         }
@@ -188,6 +194,7 @@ export type Database = {
           id: string
           matiere: string | null
           nom: string
+          photo: string | null
           prenom: string
           salaire: number
           telephone: string | null
@@ -198,6 +205,7 @@ export type Database = {
           id?: string
           matiere?: string | null
           nom: string
+          photo?: string | null
           prenom: string
           salaire?: number
           telephone?: string | null
@@ -208,6 +216,7 @@ export type Database = {
           id?: string
           matiere?: string | null
           nom?: string
+          photo?: string | null
           prenom?: string
           salaire?: number
           telephone?: string | null
@@ -222,6 +231,7 @@ export type Database = {
           created_at: string
           date_inscription: string
           id: string
+          montant_inscription: number | null
           nom: string
           prenom: string
           status: string
@@ -232,6 +242,7 @@ export type Database = {
           created_at?: string
           date_inscription?: string
           id?: string
+          montant_inscription?: number | null
           nom: string
           prenom: string
           status?: string
@@ -242,6 +253,7 @@ export type Database = {
           created_at?: string
           date_inscription?: string
           id?: string
+          montant_inscription?: number | null
           nom?: string
           prenom?: string
           status?: string
