@@ -9,6 +9,8 @@ export interface AppUser {
   role: UserRole;
   display_name: string;
   photo?: string | null;
+  poste?: string | null;
+  telephone?: string | null;
 }
 
 // Session stored in memory (client-side only)
@@ -59,7 +61,7 @@ export function logoutUser() {
   sessionStorage.removeItem("educ_current_user");
 }
 
-export async function updateUser(userId: string, updates: { username?: string; password?: string; display_name?: string; photo?: string }): Promise<AppUser | null> {
+export async function updateUser(userId: string, updates: { username?: string; password?: string; display_name?: string; photo?: string; poste?: string; telephone?: string }): Promise<AppUser | null> {
   const { data, error } = await supabase.from("app_users").update(updates).eq("id", userId).select().maybeSingle();
   if (error || !data) return null;
   return mapUser(data);
@@ -70,7 +72,7 @@ export async function getAllUsers(): Promise<AppUser[]> {
   return (data || []).map(mapUser);
 }
 
-export async function createUser(user: { username: string; password: string; display_name: string; role: UserRole }): Promise<AppUser | null> {
+export async function createUser(user: { username: string; password: string; display_name: string; role: UserRole; photo?: string | null; poste?: string; telephone?: string }): Promise<AppUser | null> {
   const { data, error } = await supabase.from("app_users").insert(user).select().maybeSingle();
   if (error || !data) return null;
   return mapUser(data);
@@ -92,5 +94,7 @@ function mapUser(row: Record<string, unknown>): AppUser {
     role: row.role as UserRole,
     display_name: row.display_name as string,
     photo: row.photo as string | null,
+    poste: row.poste as string | null,
+    telephone: row.telephone as string | null,
   };
 }
