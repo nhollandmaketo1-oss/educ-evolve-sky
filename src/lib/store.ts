@@ -8,6 +8,7 @@ export interface Student {
   contact_parent: string | null;
   date_inscription: string;
   status: "actif" | "inactif";
+  montant_inscription: number;
 }
 
 export interface Personnel {
