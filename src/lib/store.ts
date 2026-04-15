@@ -87,7 +87,14 @@ export async function addStudent(s: Omit<Student, "id">): Promise<Student | null
   return data as Student;
 }
 
-// Personnel
+export async function updateStudent(id: string, s: Partial<Omit<Student, "id">>): Promise<void> {
+  await supabase.from("students").update(s).eq("id", id);
+}
+
+export async function deleteStudent(id: string): Promise<void> {
+  await supabase.from("students").delete().eq("id", id);
+}
+
 export async function getPersonnel(): Promise<Personnel[]> {
   const { data } = await supabase.from("personnel").select("*").order("created_at", { ascending: false });
   return (data || []) as Personnel[];
@@ -100,6 +107,14 @@ export async function addPersonnel(p: Omit<Personnel, "id">): Promise<Personnel 
     photo: p.photo,
   }).select().maybeSingle();
   return (data || null) as Personnel | null;
+}
+
+export async function updatePersonnel(id: string, p: Partial<Omit<Personnel, "id">>): Promise<void> {
+  await supabase.from("personnel").update(p).eq("id", id);
+}
+
+export async function deletePersonnel(id: string): Promise<void> {
+  await supabase.from("personnel").delete().eq("id", id);
 }
 
 // Payments
