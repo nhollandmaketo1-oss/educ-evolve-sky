@@ -8,6 +8,7 @@ export interface Student {
   contact_parent: string | null;
   date_inscription: string;
   status: "actif" | "inactif";
+  montant_inscription: number;
 }
 
 export interface Personnel {
@@ -18,6 +19,7 @@ export interface Personnel {
   matiere: string | null;
   salaire: number;
   telephone: string | null;
+  photo: string | null;
 }
 
 export interface Payment {
@@ -78,9 +80,9 @@ export async function addStudent(s: Omit<Student, "id">): Promise<Student | null
   const { data, error } = await supabase.from("students").insert({
     nom: s.nom, prenom: s.prenom, classe: s.classe,
     contact_parent: s.contact_parent, status: s.status,
+    montant_inscription: s.montant_inscription,
   }).select().maybeSingle();
   if (error || !data) return null;
-  // Add notification
   await addNotification({ message: `Nouvel élève inscrit: ${s.prenom} ${s.nom} en ${s.classe}`, target_role: "dg", read: false });
   return data as Student;
 }
@@ -95,6 +97,7 @@ export async function addPersonnel(p: Omit<Personnel, "id">): Promise<Personnel 
   const { data } = await supabase.from("personnel").insert({
     nom: p.nom, prenom: p.prenom, type: p.type,
     matiere: p.matiere, salaire: p.salaire, telephone: p.telephone,
+    photo: p.photo,
   }).select().maybeSingle();
   return (data || null) as Personnel | null;
 }

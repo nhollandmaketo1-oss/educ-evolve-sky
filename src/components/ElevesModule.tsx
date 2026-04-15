@@ -5,7 +5,7 @@ import { Plus, X } from "lucide-react";
 export function ElevesModule() {
   const [students, setStudents] = useState<Student[]>([]);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "" });
+  const [form, setForm] = useState({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "", montant_inscription: "" });
   const [filterClasse, setFilterClasse] = useState("all");
 
   useEffect(() => { getStudents().then(setStudents); }, []);
@@ -13,9 +13,9 @@ export function ElevesModule() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nom || !form.prenom) return;
-    await addStudent({ ...form, date_inscription: new Date().toISOString(), status: "actif" });
+    await addStudent({ ...form, montant_inscription: Number(form.montant_inscription) || 0, date_inscription: new Date().toISOString(), status: "actif" });
     setStudents(await getStudents());
-    setForm({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "" });
+    setForm({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "", montant_inscription: "" });
     setShowForm(false);
   };
 
@@ -46,7 +46,8 @@ export function ElevesModule() {
               <select value={form.classe} onChange={(e) => setForm({ ...form, classe: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border">
                 {CLASSES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
-              <input placeholder="Contact parent" value={form.contact_parent} onChange={(e) => setForm({ ...form, contact_parent: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
+              <input placeholder="Contact parent (nom & téléphone)" value={form.contact_parent} onChange={(e) => setForm({ ...form, contact_parent: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
+              <input type="number" placeholder="Montant inscription (FCFA)" value={form.montant_inscription} onChange={(e) => setForm({ ...form, montant_inscription: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
               <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90">Inscrire</button>
             </form>
           </div>
@@ -59,19 +60,21 @@ export function ElevesModule() {
               <th className="text-left px-4 py-3 font-medium">Nom</th>
               <th className="text-left px-4 py-3 font-medium">Prénom</th>
               <th className="text-left px-4 py-3 font-medium">Classe</th>
-              <th className="text-left px-4 py-3 font-medium">Contact</th>
+              <th className="text-left px-4 py-3 font-medium">Contact Parent</th>
+              <th className="text-left px-4 py-3 font-medium">Inscription</th>
               <th className="text-left px-4 py-3 font-medium">Date</th>
               <th className="text-left px-4 py-3 font-medium">Statut</th>
             </tr></thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Aucun élève inscrit</td></tr>
+                <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Aucun élève inscrit</td></tr>
               ) : filtered.map((s) => (
                 <tr key={s.id} className="border-t border-border hover:bg-secondary/50">
                   <td className="px-4 py-3 font-medium">{s.nom}</td>
                   <td className="px-4 py-3">{s.prenom}</td>
                   <td className="px-4 py-3">{s.classe}</td>
-                  <td className="px-4 py-3">{s.contact_parent}</td>
+                  <td className="px-4 py-3">{s.contact_parent || "—"}</td>
+                  <td className="px-4 py-3">{Number(s.montant_inscription).toLocaleString()} FCFA</td>
                   <td className="px-4 py-3 text-muted-foreground">{new Date(s.date_inscription).toLocaleDateString("fr-FR")}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.status === "actif" ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>{s.status}</span>
