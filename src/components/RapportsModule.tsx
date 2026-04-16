@@ -1,3 +1,6 @@
+import { RapportPresenceModule } from "./RapportPresenceModule";
+import { BulletinModule } from "./BulletinModule";
+
 export function RapportsModule() {
   const trimestres = [
     { label: "1er Trimestre", mois: "Septembre - Décembre" },
@@ -6,23 +9,12 @@ export function RapportsModule() {
   ];
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">Rapports Trimestriels</h2>
+    <div className="space-y-8">
+      <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">Rapports & Bulletins</h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {trimestres.map((t) => (
-          <div key={t.label} className="bg-card rounded-2xl p-6 shadow-sm border border-border text-center">
-            <h3 className="font-bold text-lg text-foreground">{t.label}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{t.mois}</p>
-            <button className="mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90">
-              Générer le rapport
-            </button>
-          </div>
-        ))}
-      </div>
-
+      {/* Calendrier Scolaire */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
-        <h3 className="font-semibold mb-3">Calendrier Scolaire</h3>
+        <h3 className="font-semibold mb-3">📅 Calendrier Scolaire</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             { event: "Rentrée scolaire", date: "02 Sept 2025" },
@@ -37,6 +29,12 @@ export function RapportsModule() {
           ))}
         </div>
       </div>
+
+      {/* Rapport de présence */}
+      <RapportPresenceModule />
+
+      {/* Bulletins scolaires */}
+      <BulletinModule />
     </div>
   );
 }
