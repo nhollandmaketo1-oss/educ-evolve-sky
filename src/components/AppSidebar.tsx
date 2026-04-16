@@ -20,7 +20,7 @@ const allNavItems = [
   { icon: ClipboardCheck, label: "Présences", to: "/presences", roles: ["dg", "de"] },
   { icon: BookOpen, label: "Notes", to: "/notes", roles: ["dg", "de"] },
   { icon: BarChart3, label: "Statistiques", to: "/statistiques", roles: ["dg", "de"] },
-  { icon: FileText, label: "Rapports", to: "/rapports", roles: ["dg", "de"] },
+  { icon: FileText, label: "Rapports", to: "/rapports", roles: ["dg", "de", "gestionnaire"] },
   { icon: Settings, label: "Utilisateurs", to: "/utilisateurs", roles: ["dg"] },
   { icon: User, label: "Mon Profil", to: "/profil", roles: ["dg", "de", "gestionnaire"] },
 ];
