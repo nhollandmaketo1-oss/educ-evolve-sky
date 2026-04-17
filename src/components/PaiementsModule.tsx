@@ -106,6 +106,36 @@ export function PaiementsModule() {
     await reload();
   };
 
+  const handleBulkCollect = async () => {
+    if (filterClasse === "all") {
+      toast.error("Sélectionnez d'abord une classe spécifique");
+      return;
+    }
+    const targets = filteredStudents.filter((s) => {
+      const already = payments.find((p) => p.student_id === s.id && p.mois === filterMois);
+      return !already && Number(s.frais_scolaire || 0) > 0;
+    });
+    if (targets.length === 0) {
+      toast.info("Aucun élève à encaisser pour ce mois (déjà payés ou frais non défini)");
+      return;
+    }
+    if (!confirm(`Encaisser ${targets.length} paiement(s) pour la classe ${filterClasse} — mois de ${filterMois} ?`)) return;
+    const nowIso = new Date().toISOString();
+    await Promise.all(
+      targets.map((s) =>
+        addPayment({
+          student_id: s.id,
+          montant: Number(s.frais_scolaire),
+          date: nowIso,
+          mois: filterMois,
+          status: "payé",
+        })
+      )
+    );
+    await reload();
+    toast.success(`${targets.length} paiement(s) enregistré(s) pour ${filterClasse}`);
+  };
+
   // Build per-student status for the selected month
   const monthIndex = MOIS.indexOf(filterMois);
   const monthOver = isMonthOver(monthIndex, year);
