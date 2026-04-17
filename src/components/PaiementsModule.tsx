@@ -43,6 +43,40 @@ export function PaiementsModule() {
 
   useEffect(() => { reload(); }, []);
 
+  // Auto-notify DG of late payers when a month is over (deduplicated by message)
+  useEffect(() => {
+    if (students.length === 0) return;
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    // Check the most recently completed month
+    const lastCompletedIdx = today.getMonth() - 1; // can be -1 if January
+    if (lastCompletedIdx < 0) return;
+    const moisName = MOIS[lastCompletedIdx];
+    const lateStudents = students.filter((s) => {
+      if (Number(s.frais_scolaire || 0) <= 0) return false;
+      const paid = payments.find(
+        (p) => p.student_id === s.id && p.mois === moisName && (p.status === "payé" || p.status === "partiel"),
+      );
+      return !paid;
+    });
+    if (lateStudents.length === 0) return;
+    const tag = `[RETARD-${moisName}-${currentYear}]`;
+    (async () => {
+      const existing = await getNotifications();
+      if (existing.some((n) => n.message.startsWith(tag))) return;
+      const list = lateStudents
+        .slice(0, 30)
+        .map((s) => `${s.prenom} ${s.nom} (${s.classe})`)
+        .join(", ");
+      const more = lateStudents.length > 30 ? ` +${lateStudents.length - 30} autres` : "";
+      await addNotification({
+        message: `${tag} ${lateStudents.length} élève(s) n'ont pas payé les frais de ${moisName} ${currentYear} : ${list}${more}`,
+        target_role: "dg",
+        read: false,
+      });
+    })();
+  }, [students, payments]);
+
   const classes = useMemo(
     () => Array.from(new Set(students.map((s) => s.classe))).sort(),
     [students],
@@ -208,6 +242,14 @@ export function PaiementsModule() {
             Mois terminé
           </span>
         )}
+        <button
+          onClick={handleBulkCollect}
+          disabled={filterClasse === "all"}
+          className="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl bg-success text-white text-sm font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+          title={filterClasse === "all" ? "Sélectionnez une classe" : `Encaisser tous les frais de ${filterClasse} pour ${filterMois}`}
+        >
+          <Wallet className="w-4 h-4" /> Encaisser tous les frais du mois
+        </button>
       </div>
 
       {/* Stats */}
