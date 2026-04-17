@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
 import {
   getStudents, getPayments, addPayment, updatePayment, deletePayment,
+  getNotifications, addNotification,
   type Payment, type Student,
 } from "@/lib/store";
-import { Plus, X, Pencil, Trash2, CheckCircle2, AlertCircle, Filter } from "lucide-react";
+import { Plus, X, Pencil, Trash2, CheckCircle2, AlertCircle, Filter, Wallet } from "lucide-react";
+import { toast } from "sonner";
 
 const MOIS = [
   "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
