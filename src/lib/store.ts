@@ -9,6 +9,7 @@ export interface Student {
   date_inscription: string;
   status: "actif" | "inactif";
   montant_inscription: number;
+  frais_scolaire: number;
 }
 
 export interface Personnel {
@@ -81,6 +82,7 @@ export async function addStudent(s: Omit<Student, "id">): Promise<Student | null
     nom: s.nom, prenom: s.prenom, classe: s.classe,
     contact_parent: s.contact_parent, status: s.status,
     montant_inscription: s.montant_inscription,
+    frais_scolaire: s.frais_scolaire,
   }).select().maybeSingle();
   if (error || !data) return null;
   await addNotification({ message: `Nouvel élève inscrit: ${s.prenom} ${s.nom} en ${s.classe}`, target_role: "dg", read: false });
@@ -128,6 +130,14 @@ export async function addPayment(p: Omit<Payment, "id">): Promise<Payment | null
     student_id: p.student_id, montant: p.montant, mois: p.mois, status: p.status,
   }).select().maybeSingle();
   return (data || null) as Payment | null;
+}
+
+export async function updatePayment(id: string, p: Partial<Omit<Payment, "id">>): Promise<void> {
+  await supabase.from("payments").update(p).eq("id", id);
+}
+
+export async function deletePayment(id: string): Promise<void> {
+  await supabase.from("payments").delete().eq("id", id);
 }
 
 // Attendance

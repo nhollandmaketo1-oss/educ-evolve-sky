@@ -230,6 +230,7 @@ export type Database = {
           contact_parent: string | null
           created_at: string
           date_inscription: string
+          frais_scolaire: number
           id: string
           montant_inscription: number | null
           nom: string
@@ -241,6 +242,7 @@ export type Database = {
           contact_parent?: string | null
           created_at?: string
           date_inscription?: string
+          frais_scolaire?: number
           id?: string
           montant_inscription?: number | null
           nom: string
@@ -252,6 +254,7 @@ export type Database = {
           contact_parent?: string | null
           created_at?: string
           date_inscription?: string
+          frais_scolaire?: number
           id?: string
           montant_inscription?: number | null
           nom?: string

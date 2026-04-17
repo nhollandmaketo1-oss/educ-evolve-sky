@@ -1,0 +1,1 @@
+ALTER TABLE public.students ADD COLUMN IF NOT EXISTS frais_scolaire numeric NOT NULL DEFAULT 0;
