@@ -6,13 +6,13 @@ export function ElevesModule() {
   const [students, setStudents] = useState<Student[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editStudent, setEditStudent] = useState<Student | null>(null);
-  const [form, setForm] = useState({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "", montant_inscription: "" });
+  const [form, setForm] = useState({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "", montant_inscription: "", frais_scolaire: "" });
   const [filterClasse, setFilterClasse] = useState("all");
 
   useEffect(() => { getStudents().then(setStudents); }, []);
 
   const resetForm = () => {
-    setForm({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "", montant_inscription: "" });
+    setForm({ nom: "", prenom: "", classe: CLASSES[0], contact_parent: "", montant_inscription: "", frais_scolaire: "" });
     setShowForm(false);
     setEditStudent(null);
   };
@@ -20,10 +20,15 @@ export function ElevesModule() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.nom || !form.prenom) return;
+    const payload = {
+      ...form,
+      montant_inscription: Number(form.montant_inscription) || 0,
+      frais_scolaire: Number(form.frais_scolaire) || 0,
+    };
     if (editStudent) {
-      await updateStudent(editStudent.id, { ...form, montant_inscription: Number(form.montant_inscription) || 0 });
+      await updateStudent(editStudent.id, payload);
     } else {
-      await addStudent({ ...form, montant_inscription: Number(form.montant_inscription) || 0, date_inscription: new Date().toISOString(), status: "actif" });
+      await addStudent({ ...payload, date_inscription: new Date().toISOString(), status: "actif" });
     }
     setStudents(await getStudents());
     resetForm();
@@ -37,7 +42,7 @@ export function ElevesModule() {
 
   const openEdit = (s: Student) => {
     setEditStudent(s);
-    setForm({ nom: s.nom, prenom: s.prenom, classe: s.classe, contact_parent: s.contact_parent || "", montant_inscription: String(s.montant_inscription || 0) });
+    setForm({ nom: s.nom, prenom: s.prenom, classe: s.classe, contact_parent: s.contact_parent || "", montant_inscription: String(s.montant_inscription || 0), frais_scolaire: String(s.frais_scolaire || 0) });
   };
 
   const filtered = filterClasse === "all" ? students : students.filter((s) => s.classe === filterClasse);
@@ -69,6 +74,7 @@ export function ElevesModule() {
               </select>
               <input placeholder="Contact parent (nom & téléphone)" value={form.contact_parent} onChange={(e) => setForm({ ...form, contact_parent: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
               <input type="number" placeholder="Montant inscription (FCFA)" value={form.montant_inscription} onChange={(e) => setForm({ ...form, montant_inscription: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
+              <input type="number" placeholder="Frais scolaire mensuel (FCFA)" value={form.frais_scolaire} onChange={(e) => setForm({ ...form, frais_scolaire: e.target.value })} className="w-full px-4 py-2.5 rounded-xl bg-input text-foreground border border-border" />
               <button type="submit" className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold hover:opacity-90">{editStudent ? "Modifier" : "Inscrire"}</button>
             </form>
           </div>
