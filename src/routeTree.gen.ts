@@ -16,6 +16,7 @@ import { Route as RapportsRouteImport } from './routes/rapports'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PresencesRouteImport } from './routes/presences'
 import { Route as PersonnelRouteImport } from './routes/personnel'
+import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as PaiementsRouteImport } from './routes/paiements'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as ElevesRouteImport } from './routes/eleves'
@@ -56,6 +57,11 @@ const PersonnelRoute = PersonnelRouteImport.update({
   path: '/personnel',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ParametresRoute = ParametresRouteImport.update({
+  id: '/parametres',
+  path: '/parametres',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PaiementsRoute = PaiementsRouteImport.update({
   id: '/paiements',
   path: '/paiements',
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/eleves': typeof ElevesRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
+  '/parametres': typeof ParametresRoute
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
   '/profil': typeof ProfilRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/eleves': typeof ElevesRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
+  '/parametres': typeof ParametresRoute
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
   '/profil': typeof ProfilRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/eleves': typeof ElevesRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
+  '/parametres': typeof ParametresRoute
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
   '/profil': typeof ProfilRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/eleves'
     | '/notes'
     | '/paiements'
+    | '/parametres'
     | '/personnel'
     | '/presences'
     | '/profil'
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/eleves'
     | '/notes'
     | '/paiements'
+    | '/parametres'
     | '/personnel'
     | '/presences'
     | '/profil'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/eleves'
     | '/notes'
     | '/paiements'
+    | '/parametres'
     | '/personnel'
     | '/presences'
     | '/profil'
@@ -164,6 +176,7 @@ export interface RootRouteChildren {
   ElevesRoute: typeof ElevesRoute
   NotesRoute: typeof NotesRoute
   PaiementsRoute: typeof PaiementsRoute
+  ParametresRoute: typeof ParametresRoute
   PersonnelRoute: typeof PersonnelRoute
   PresencesRoute: typeof PresencesRoute
   ProfilRoute: typeof ProfilRoute
@@ -224,6 +237,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PersonnelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/parametres': {
+      id: '/parametres'
+      path: '/parametres'
+      fullPath: '/parametres'
+      preLoaderRoute: typeof ParametresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/paiements': {
       id: '/paiements'
       path: '/paiements'
@@ -260,6 +280,7 @@ const rootRouteChildren: RootRouteChildren = {
   ElevesRoute: ElevesRoute,
   NotesRoute: NotesRoute,
   PaiementsRoute: PaiementsRoute,
+  ParametresRoute: ParametresRoute,
   PersonnelRoute: PersonnelRoute,
   PresencesRoute: PresencesRoute,
   ProfilRoute: ProfilRoute,
