@@ -166,6 +166,25 @@ export async function markNotificationRead(id: string) {
   await supabase.from("notifications").update({ read: true }).eq("id", id);
 }
 
+// App settings
+export async function getSetting(key: string): Promise<string | null> {
+  const { data } = await supabase.from("app_settings").select("value").eq("key", key).maybeSingle();
+  return (data?.value as string | null) ?? null;
+}
+
+export async function setSetting(key: string, value: string | null): Promise<void> {
+  const { data: existing } = await supabase.from("app_settings").select("id").eq("key", key).maybeSingle();
+  if (existing) {
+    await supabase.from("app_settings").update({ value }).eq("key", key);
+  } else {
+    await supabase.from("app_settings").insert({ key, value });
+  }
+}
+
+export async function deleteSetting(key: string): Promise<void> {
+  await supabase.from("app_settings").delete().eq("key", key);
+}
+
 // Grades
 export async function getGrades(): Promise<Grade[]> {
   const { data } = await supabase.from("grades").select("*").order("created_at", { ascending: false });

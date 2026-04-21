@@ -1,7 +1,8 @@
-import { Bell, Menu, Search } from "lucide-react";
+import { Bell, Menu, Search, Pencil, Check, X, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { getNotifications, markNotificationRead, type Notification } from "@/lib/store";
+import { getNotifications, markNotificationRead, getSetting, setSetting, type Notification } from "@/lib/store";
 import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 
 interface TopBarProps {
   title: string;
@@ -12,12 +13,21 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
   const { user } = useAuth();
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [schoolName, setSchoolName] = useState<string>("");
+  const [editingSchool, setEditingSchool] = useState(false);
+  const [schoolDraft, setSchoolDraft] = useState("");
+
+  const canEditSchool = user?.role === "dg";
 
   useEffect(() => {
     getNotifications().then((n) => {
       setNotifications(n.filter((nn) => nn.target_role === user?.role || nn.target_role === "all"));
     });
   }, [user?.role]);
+
+  useEffect(() => {
+    getSetting("school_name").then((v) => setSchoolName(v ?? ""));
+  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -27,15 +37,75 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
     setShowNotifs(false);
   };
 
+  const startEdit = () => {
+    setSchoolDraft(schoolName);
+    setEditingSchool(true);
+  };
+
+  const saveSchool = async () => {
+    const v = schoolDraft.trim();
+    await setSetting("school_name", v);
+    setSchoolName(v);
+    setEditingSchool(false);
+  };
+
+  const clearSchool = async () => {
+    await setSetting("school_name", "");
+    setSchoolName("");
+    setEditingSchool(false);
+  };
+
   return (
-    <header className="bg-card border-b border-border px-4 md:px-6 py-3 flex items-center justify-between sticky top-0 z-10">
-      <div className="flex items-center gap-3">
+    <header className="bg-card border-b border-border px-4 md:px-6 py-3 flex items-center justify-between sticky top-0 z-10 gap-3">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <button className="md:hidden p-2 rounded-lg hover:bg-secondary" onClick={onMenuToggle}>
           <Menu className="w-5 h-5 text-foreground" />
         </button>
-        <h1 className="text-lg font-bold font-[family-name:var(--font-display)] text-foreground">{title}</h1>
+        <div className="flex flex-col min-w-0">
+          {editingSchool ? (
+            <div className="flex items-center gap-1">
+              <Input
+                autoFocus
+                value={schoolDraft}
+                onChange={(e) => setSchoolDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") saveSchool();
+                  if (e.key === "Escape") setEditingSchool(false);
+                }}
+                placeholder="Nom de l'école"
+                className="h-8 w-44 sm:w-56 text-sm"
+              />
+              <button onClick={saveSchool} className="p-1.5 rounded-md text-success hover:bg-success/10" title="Enregistrer">
+                <Check className="w-4 h-4" />
+              </button>
+              <button onClick={() => setEditingSchool(false)} className="p-1.5 rounded-md text-muted-foreground hover:bg-secondary" title="Annuler">
+                <X className="w-4 h-4" />
+              </button>
+              {schoolName && (
+                <button onClick={clearSchool} className="p-1.5 rounded-md text-destructive hover:bg-destructive/10" title="Supprimer">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 min-w-0">
+              <span
+                className={`text-sm font-semibold font-[family-name:var(--font-display)] truncate ${schoolName ? "text-primary" : "text-muted-foreground italic"}`}
+                title={schoolName || "Nom de l'école"}
+              >
+                {schoolName || (canEditSchool ? "Ajouter le nom de l'école" : "École")}
+              </span>
+              {canEditSchool && (
+                <button onClick={startEdit} className="p-1 rounded-md hover:bg-secondary text-muted-foreground" title="Modifier">
+                  <Pencil className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+          <h1 className="text-base md:text-lg font-bold font-[family-name:var(--font-display)] text-foreground truncate">{title}</h1>
+        </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 shrink-0">
         <div className="hidden sm:flex items-center bg-input rounded-xl px-3 py-2 gap-2">
           <Search className="w-4 h-4 text-muted-foreground" />
           <input type="text" placeholder="Rechercher..." className="bg-transparent text-sm outline-none w-32 text-foreground placeholder:text-muted-foreground" />
