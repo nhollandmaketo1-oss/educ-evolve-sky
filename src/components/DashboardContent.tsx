@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { GraduationCap, CreditCard, UserCog, Wallet, ClipboardCheck, BarChart3 } from "lucide-react";
 import { getStudents, getPersonnel, getPayments, type Student, type Personnel, type Payment } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
+import { useSchoolDisplayName } from "@/hooks/useSchoolName";
 import { getRoleLabel } from "@/lib/auth";
 import { Link } from "@tanstack/react-router";
 
@@ -16,6 +17,7 @@ const iconBgs = [
 
 export function DashboardContent() {
   const { user } = useAuth();
+  const schoolName = useSchoolDisplayName();
   const [students, setStudents] = useState<Student[]>([]);
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -41,8 +43,9 @@ export function DashboardContent() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-foreground">Bienvenue, {user?.display_name}</h2>
-        <p className="text-muted-foreground text-sm">{user ? getRoleLabel(user.role) : ""} — Tableau de bord</p>
+        <h2 className="text-2xl font-bold font-[family-name:var(--font-display)] text-foreground">{schoolName}</h2>
+        <p className="text-sm text-foreground/80 mt-0.5">Bienvenue, {user?.display_name}</p>
+        <p className="text-muted-foreground text-xs">{user ? getRoleLabel(user.role) : ""} — Tableau de bord</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map((card) => (

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getPersonnel, getAttendance, MATIERES, type Personnel, type Attendance } from "@/lib/store";
+import { useSchoolDisplayName } from "@/hooks/useSchoolName";
 import { FileText, Printer } from "lucide-react";
 
 interface TeacherReport {
@@ -11,6 +12,7 @@ interface TeacherReport {
 }
 
 export function RapportPresenceModule() {
+  const schoolName = useSchoolDisplayName();
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [dateDebut, setDateDebut] = useState(() => {
@@ -46,7 +48,7 @@ export function RapportPresenceModule() {
     if (!printRef.current) return;
     const w = window.open("", "_blank");
     if (!w) return;
-    w.document.write(`<!DOCTYPE html><html><head><title>Rapport de Présence</title>
+    w.document.write(`<!DOCTYPE html><html><head><title>${schoolName} — Rapport de Présence</title>
       <style>
         body{font-family:Arial,sans-serif;padding:20px;font-size:12px}
         table{width:100%;border-collapse:collapse;margin-top:10px}
@@ -138,7 +140,7 @@ export function RapportPresenceModule() {
           <div className="hidden">
             <div ref={printRef}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <h1 style={{ color: "#1e40af" }}>EDUC 2.0 — Rapport de Présence au Poste</h1>
+                <h1 style={{ color: "#1e40af" }}>{schoolName} — Rapport de Présence au Poste</h1>
                 <p>Période : {dateDebut} au {dateFin}</p>
               </div>
               <table>
@@ -163,7 +165,7 @@ export function RapportPresenceModule() {
                   </tr>
                 </tbody>
               </table>
-              <p style={{ marginTop: 30, fontSize: 10, textAlign: "center", color: "#666" }}>Document généré par EDUC 2.0 — MAKETO NHOLLAND</p>
+              <p style={{ marginTop: 30, fontSize: 10, textAlign: "center", color: "#666" }}>Document généré par {schoolName} — EDUC 2.0</p>
             </div>
           </div>
         </>

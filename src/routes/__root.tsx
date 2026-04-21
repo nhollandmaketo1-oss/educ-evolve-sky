@@ -1,5 +1,6 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { AuthProvider } from "@/hooks/useAuth";
+import { SchoolNameProvider } from "@/hooks/useSchoolName";
 
 import appCss from "../styles.css?url";
 
@@ -71,5 +72,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  return <AuthProvider><Outlet /></AuthProvider>;
+  return (
+    <AuthProvider>
+      <SchoolNameProvider>
+        <Outlet />
+      </SchoolNameProvider>
+    </AuthProvider>
+  );
 }
