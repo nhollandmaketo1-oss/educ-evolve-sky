@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getStudents, getGrades, addGrade, CLASSES, MATIERES, type Student, type Grade } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
+import { useSchoolDisplayName } from "@/hooks/useSchoolName";
 import { FileText, Printer, Plus, X, Download, BarChart3 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -80,6 +81,7 @@ function computeStudentAverage(student: Student, grades: Grade[], trimestre: num
 
 export function BulletinModule() {
   const { user } = useAuth();
+  const schoolName = useSchoolDisplayName();
   const role = user?.role;
   const canCreate = role === "de"; // Only DE002 can create
   const canView = role === "dg" || role === "de" || role === "gestionnaire"; // DG, DE, GES can view
@@ -165,7 +167,7 @@ export function BulletinModule() {
     // Header
     doc.setFontSize(18);
     doc.setTextColor(30, 64, 175);
-    doc.text("EDUC 2.0 - BULLETIN SCOLAIRE", 105, 20, { align: "center" });
+    doc.text(`${schoolName.toUpperCase()} - BULLETIN SCOLAIRE`, 105, 20, { align: "center" });
     doc.setFontSize(12);
     doc.setTextColor(51, 51, 51);
     doc.text(`${trimestreLabel} Trimestre - Annee Scolaire 2025-2026`, 105, 28, { align: "center" });
@@ -216,7 +218,7 @@ export function BulletinModule() {
     // Footer
     doc.setFontSize(7);
     doc.setTextColor(153, 153, 153);
-    doc.text("Document genere par EDUC 2.0 - MAKETO NHOLLAND", 105, 285, { align: "center" });
+    doc.text(`Document genere par ${schoolName} - EDUC 2.0`, 105, 285, { align: "center" });
 
     doc.save(`Bulletin_${student.prenom}_${student.nom}_T${bulletin.trimestre}.pdf`);
   };

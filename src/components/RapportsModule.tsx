@@ -1,16 +1,13 @@
 import { RapportPresenceModule } from "./RapportPresenceModule";
 import { BulletinModule } from "./BulletinModule";
+import { useSchoolDisplayName } from "@/hooks/useSchoolName";
 
 export function RapportsModule() {
-  const trimestres = [
-    { label: "1er Trimestre", mois: "Septembre - Décembre" },
-    { label: "2ème Trimestre", mois: "Janvier - Mars" },
-    { label: "3ème Trimestre", mois: "Avril - Juin" },
-  ];
+  const schoolName = useSchoolDisplayName();
 
   return (
     <div className="space-y-8">
-      <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">Rapports & Bulletins</h2>
+      <h2 className="text-xl font-bold font-[family-name:var(--font-display)]">{schoolName} — Rapports & Bulletins</h2>
 
       {/* Calendrier Scolaire */}
       <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">

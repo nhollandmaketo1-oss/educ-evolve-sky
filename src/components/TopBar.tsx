@@ -1,6 +1,8 @@
 import { Bell, Menu, Search, Pencil, Check, X, Trash2 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
-import { getNotifications, markNotificationRead, getSetting, setSetting, type Notification } from "@/lib/store";
+import { useSchoolName } from "@/hooks/useSchoolName";
+import { getNotifications, markNotificationRead, type Notification } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
@@ -11,9 +13,9 @@ interface TopBarProps {
 
 export function TopBar({ title, onMenuToggle }: TopBarProps) {
   const { user } = useAuth();
+  const { schoolName, setSchoolName } = useSchoolName();
   const [showNotifs, setShowNotifs] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [schoolName, setSchoolName] = useState<string>("");
   const [editingSchool, setEditingSchool] = useState(false);
   const [schoolDraft, setSchoolDraft] = useState("");
 
@@ -24,10 +26,6 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
       setNotifications(n.filter((nn) => nn.target_role === user?.role || nn.target_role === "all"));
     });
   }, [user?.role]);
-
-  useEffect(() => {
-    getSetting("school_name").then((v) => setSchoolName(v ?? ""));
-  }, []);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -43,15 +41,12 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
   };
 
   const saveSchool = async () => {
-    const v = schoolDraft.trim();
-    await setSetting("school_name", v);
-    setSchoolName(v);
+    await setSchoolName(schoolDraft.trim());
     setEditingSchool(false);
   };
 
   const clearSchool = async () => {
-    await setSetting("school_name", "");
-    setSchoolName("");
+    await setSchoolName("");
     setEditingSchool(false);
   };
 
@@ -89,14 +84,23 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
             </div>
           ) : (
             <div className="flex items-center gap-2 min-w-0">
-              <span
-                className={`text-sm font-semibold font-[family-name:var(--font-display)] truncate ${schoolName ? "text-primary" : "text-muted-foreground italic"}`}
-                title={schoolName || "Nom de l'école"}
-              >
-                {schoolName || (canEditSchool ? "Ajouter le nom de l'école" : "École")}
-              </span>
+              {canEditSchool ? (
+                <Link
+                  to="/parametres"
+                  className={`text-sm font-semibold font-[family-name:var(--font-display)] truncate hover:underline ${schoolName ? "text-primary" : "text-muted-foreground italic"}`}
+                  title="Gérer dans Paramètres"
+                >
+                  {schoolName || "Ajouter le nom de l'école"}
+                </Link>
+              ) : (
+                <span
+                  className={`text-sm font-semibold font-[family-name:var(--font-display)] truncate ${schoolName ? "text-primary" : "text-muted-foreground italic"}`}
+                >
+                  {schoolName || "École"}
+                </span>
+              )}
               {canEditSchool && (
-                <button onClick={startEdit} className="p-1 rounded-md hover:bg-secondary text-muted-foreground" title="Modifier">
+                <button onClick={startEdit} className="p-1 rounded-md hover:bg-secondary text-muted-foreground" title="Modifier rapidement">
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
               )}
