@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { getPersonnel, getAttendance, MATIERES, type Personnel, type Attendance } from "@/lib/store";
-import { useSchoolDisplayName } from "@/hooks/useSchoolName";
+import { useSchoolDisplayName, useSchoolLogo } from "@/hooks/useSchoolName";
 import { FileText, Printer } from "lucide-react";
 
 interface TeacherReport {
@@ -13,6 +13,7 @@ interface TeacherReport {
 
 export function RapportPresenceModule() {
   const schoolName = useSchoolDisplayName();
+  const schoolLogo = useSchoolLogo();
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [dateDebut, setDateDebut] = useState(() => {
@@ -140,7 +141,10 @@ export function RapportPresenceModule() {
           <div className="hidden">
             <div ref={printRef}>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <h1 style={{ color: "#1e40af" }}>{schoolName} — Rapport de Présence au Poste</h1>
+                {schoolLogo && (
+                  <img src={schoolLogo} alt="Logo" style={{ height: 60, marginBottom: 8, objectFit: "contain" }} />
+                )}
+                <h1 style={{ color: "#1e40af", margin: 0 }}>{schoolName} — Rapport de Présence au Poste</h1>
                 <p>Période : {dateDebut} au {dateFin}</p>
               </div>
               <table>

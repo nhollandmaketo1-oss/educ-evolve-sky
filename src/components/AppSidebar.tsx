@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, CreditCard, UserCog, Wallet, ClipboardCheck,
   BarChart3, FileText, Settings, LogOut, GraduationCap, User, BookOpen, Sliders
 } from "lucide-react";
-import { useSchoolDisplayName } from "@/hooks/useSchoolName";
+import { useSchoolDisplayName, useSchoolLogo } from "@/hooks/useSchoolName";
 import { type UserRole, getRoleLabel, logoutUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -31,6 +31,7 @@ export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user, refresh } = useAuth();
   const schoolName = useSchoolDisplayName();
+  const schoolLogo = useSchoolLogo();
   const role = user?.role || "gestionnaire";
   const navItems = allNavItems.filter((item) => item.roles.includes(role));
 
@@ -42,8 +43,12 @@ export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
   const sidebarContent = (
     <aside className="flex flex-col bg-sidebar text-sidebar-foreground min-h-screen w-64">
       <div className="flex flex-col items-center py-6 px-4 border-b border-sidebar-border">
-        <div className="w-14 h-14 rounded-full bg-sidebar-accent flex items-center justify-center mb-2">
-          <GraduationCap className="w-7 h-7 text-sidebar-foreground" />
+        <div className="w-14 h-14 rounded-full bg-sidebar-accent flex items-center justify-center mb-2 overflow-hidden">
+          {schoolLogo ? (
+            <img src={schoolLogo} alt="Logo de l'école" className="w-full h-full object-contain" />
+          ) : (
+            <GraduationCap className="w-7 h-7 text-sidebar-foreground" />
+          )}
         </div>
         <h2 className="font-bold text-lg font-[family-name:var(--font-display)] text-center leading-tight">{schoolName}</h2>
         <p className="text-xs text-sidebar-foreground/70">{user ? getRoleLabel(user.role) : ""}</p>
