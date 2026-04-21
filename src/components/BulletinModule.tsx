@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { getStudents, getGrades, addGrade, CLASSES, MATIERES, type Student, type Grade } from "@/lib/store";
 import { useAuth } from "@/hooks/useAuth";
-import { useSchoolDisplayName } from "@/hooks/useSchoolName";
+import { useSchoolDisplayName, useSchoolLogo } from "@/hooks/useSchoolName";
+import { imageToDataUrl } from "@/lib/imageToDataUrl";
 import { FileText, Printer, Plus, X, Download, BarChart3 } from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -82,6 +83,7 @@ function computeStudentAverage(student: Student, grades: Grade[], trimestre: num
 export function BulletinModule() {
   const { user } = useAuth();
   const schoolName = useSchoolDisplayName();
+  const schoolLogo = useSchoolLogo();
   const role = user?.role;
   const canCreate = role === "de"; // Only DE002 can create
   const canView = role === "dg" || role === "de" || role === "gestionnaire"; // DG, DE, GES can view
@@ -158,11 +160,17 @@ export function BulletinModule() {
   };
 
   // --- Export PDF ---
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!bulletin) return;
     const doc = new jsPDF();
     const { student, lignes, totalCoef, totalPoints, moyenne } = bulletin;
     const mention = getMention(moyenne);
+
+    // Logo (if any)
+    const logo = await imageToDataUrl(schoolLogo);
+    if (logo) {
+      try { doc.addImage(logo.dataUrl, logo.format, 15, 10, 20, 20); } catch { /* ignore */ }
+    }
 
     // Header
     doc.setFontSize(18);
