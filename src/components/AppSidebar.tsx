@@ -1,8 +1,9 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, CreditCard, UserCog, Wallet, ClipboardCheck,
-  BarChart3, FileText, Settings, LogOut, GraduationCap, User, BookOpen
+  BarChart3, FileText, Settings, LogOut, GraduationCap, User, BookOpen, Sliders
 } from "lucide-react";
+import { useSchoolDisplayName } from "@/hooks/useSchoolName";
 import { type UserRole, getRoleLabel, logoutUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -22,12 +23,14 @@ const allNavItems = [
   { icon: BarChart3, label: "Statistiques", to: "/statistiques", roles: ["dg", "de"] },
   { icon: FileText, label: "Rapports", to: "/rapports", roles: ["dg", "de", "gestionnaire"] },
   { icon: Settings, label: "Utilisateurs", to: "/utilisateurs", roles: ["dg"] },
+  { icon: Sliders, label: "Paramètres", to: "/parametres", roles: ["dg"] },
   { icon: User, label: "Mon Profil", to: "/profil", roles: ["dg", "de", "gestionnaire"] },
 ];
 
 export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation();
   const { user, refresh } = useAuth();
+  const schoolName = useSchoolDisplayName();
   const role = user?.role || "gestionnaire";
   const navItems = allNavItems.filter((item) => item.roles.includes(role));
 
@@ -42,7 +45,7 @@ export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
         <div className="w-14 h-14 rounded-full bg-sidebar-accent flex items-center justify-center mb-2">
           <GraduationCap className="w-7 h-7 text-sidebar-foreground" />
         </div>
-        <h2 className="font-bold text-lg font-[family-name:var(--font-display)]">EDUC 2.0</h2>
+        <h2 className="font-bold text-lg font-[family-name:var(--font-display)] text-center leading-tight">{schoolName}</h2>
         <p className="text-xs text-sidebar-foreground/70">{user ? getRoleLabel(user.role) : ""}</p>
       </div>
       <div className="px-4 pt-4 pb-1">
