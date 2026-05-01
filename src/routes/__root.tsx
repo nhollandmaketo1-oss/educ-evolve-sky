@@ -77,6 +77,7 @@ function RootComponent() {
   return (
     <AuthProvider>
       <SchoolNameProvider>
+        <OfflineBanner />
         <Outlet />
       </SchoolNameProvider>
     </AuthProvider>
