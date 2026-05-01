@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "./offlineDb";
+import { queueChange } from "./syncEngine";
 
 export interface Student {
   id: string;
@@ -71,131 +72,213 @@ export const MATIERES = [
   "Informatique", "Éducation Civique", "Dessin", "Musique"
 ];
 
-// Students
+function uuid(): string {
+  return crypto.randomUUID();
+}
+
+function now(): string {
+  return new Date().toISOString();
+}
+
+// ─── Students ───
 export async function getStudents(): Promise<Student[]> {
-  const { data } = await supabase.from("students").select("*").order("created_at", { ascending: false });
-  return (data || []) as Student[];
+  const rows = await db.students.reverse().sortBy("date_inscription");
+  return rows as unknown as Student[];
 }
 
 export async function addStudent(s: Omit<Student, "id">): Promise<Student | null> {
-  const { data, error } = await supabase.from("students").insert({
-    nom: s.nom, prenom: s.prenom, classe: s.classe,
-    contact_parent: s.contact_parent, status: s.status,
+  const id = uuid();
+  const record = {
+    id,
+    nom: s.nom,
+    prenom: s.prenom,
+    classe: s.classe,
+    contact_parent: s.contact_parent,
+    date_inscription: now(),
+    status: s.status,
     montant_inscription: s.montant_inscription,
     frais_scolaire: s.frais_scolaire,
-  }).select().maybeSingle();
-  if (error || !data) return null;
+    _synced: false,
+    _updated_at: now(),
+  };
+  await db.students.add(record);
+  await queueChange("students", "insert", id, record);
   await addNotification({ message: `Nouvel élève inscrit: ${s.prenom} ${s.nom} en ${s.classe}`, target_role: "dg", read: false });
-  return data as Student;
+  return { ...record } as unknown as Student;
 }
 
 export async function updateStudent(id: string, s: Partial<Omit<Student, "id">>): Promise<void> {
-  await supabase.from("students").update(s).eq("id", id);
+  const existing = await db.students.get(id);
+  if (!existing) return;
+  const updated = { ...existing, ...s, _synced: false, _updated_at: now() };
+  await db.students.put(updated);
+  await queueChange("students", "update", id, updated);
 }
 
 export async function deleteStudent(id: string): Promise<void> {
-  await supabase.from("students").delete().eq("id", id);
+  await db.students.delete(id);
+  await queueChange("students", "delete", id, null);
 }
 
+// ─── Personnel ───
 export async function getPersonnel(): Promise<Personnel[]> {
-  const { data } = await supabase.from("personnel").select("*").order("created_at", { ascending: false });
-  return (data || []) as Personnel[];
+  return (await db.personnel.toArray()) as unknown as Personnel[];
 }
 
 export async function addPersonnel(p: Omit<Personnel, "id">): Promise<Personnel | null> {
-  const { data } = await supabase.from("personnel").insert({
-    nom: p.nom, prenom: p.prenom, type: p.type,
-    matiere: p.matiere, salaire: p.salaire, telephone: p.telephone,
+  const id = uuid();
+  const record = {
+    id,
+    nom: p.nom,
+    prenom: p.prenom,
+    type: p.type,
+    matiere: p.matiere,
+    salaire: p.salaire,
+    telephone: p.telephone,
     photo: p.photo,
-  }).select().maybeSingle();
-  return (data || null) as Personnel | null;
+    _synced: false,
+    _updated_at: now(),
+  };
+  await db.personnel.add(record);
+  await queueChange("personnel", "insert", id, record);
+  return { ...record } as unknown as Personnel;
 }
 
 export async function updatePersonnel(id: string, p: Partial<Omit<Personnel, "id">>): Promise<void> {
-  await supabase.from("personnel").update(p).eq("id", id);
+  const existing = await db.personnel.get(id);
+  if (!existing) return;
+  const updated = { ...existing, ...p, _synced: false, _updated_at: now() };
+  await db.personnel.put(updated);
+  await queueChange("personnel", "update", id, updated);
 }
 
 export async function deletePersonnel(id: string): Promise<void> {
-  await supabase.from("personnel").delete().eq("id", id);
+  await db.personnel.delete(id);
+  await queueChange("personnel", "delete", id, null);
 }
 
-// Payments
+// ─── Payments ───
 export async function getPayments(): Promise<Payment[]> {
-  const { data } = await supabase.from("payments").select("*").order("date", { ascending: false });
-  return (data || []) as Payment[];
+  return (await db.payments.reverse().sortBy("date")) as unknown as Payment[];
 }
 
 export async function addPayment(p: Omit<Payment, "id">): Promise<Payment | null> {
-  const { data } = await supabase.from("payments").insert({
-    student_id: p.student_id, montant: p.montant, mois: p.mois, status: p.status,
-  }).select().maybeSingle();
-  return (data || null) as Payment | null;
+  const id = uuid();
+  const record = {
+    id,
+    student_id: p.student_id,
+    montant: p.montant,
+    date: now(),
+    mois: p.mois,
+    status: p.status,
+    _synced: false,
+    _updated_at: now(),
+  };
+  await db.payments.add(record);
+  await queueChange("payments", "insert", id, record);
+  return { ...record } as unknown as Payment;
 }
 
 export async function updatePayment(id: string, p: Partial<Omit<Payment, "id">>): Promise<void> {
-  await supabase.from("payments").update(p).eq("id", id);
+  const existing = await db.payments.get(id);
+  if (!existing) return;
+  const updated = { ...existing, ...p, _synced: false, _updated_at: now() };
+  await db.payments.put(updated);
+  await queueChange("payments", "update", id, updated);
 }
 
 export async function deletePayment(id: string): Promise<void> {
-  await supabase.from("payments").delete().eq("id", id);
+  await db.payments.delete(id);
+  await queueChange("payments", "delete", id, null);
 }
 
-// Attendance
+// ─── Attendance ───
 export async function getAttendance(): Promise<Attendance[]> {
-  const { data } = await supabase.from("attendance").select("*").order("date", { ascending: false });
-  return (data || []) as Attendance[];
+  return (await db.attendance.reverse().sortBy("date")) as unknown as Attendance[];
 }
 
 export async function addAttendanceBulk(records: Omit<Attendance, "id">[]) {
-  await supabase.from("attendance").insert(records.map((r) => ({
-    personnel_id: r.personnel_id, date: r.date, heure: r.heure, present: r.present,
-  })));
-}
-
-// Notifications
-export async function getNotifications(): Promise<Notification[]> {
-  const { data } = await supabase.from("notifications").select("*").order("created_at", { ascending: false }).limit(20);
-  return (data || []) as Notification[];
-}
-
-export async function addNotification(n: Omit<Notification, "id" | "created_at">) {
-  await supabase.from("notifications").insert({ message: n.message, target_role: n.target_role, read: n.read });
-}
-
-export async function markNotificationRead(id: string) {
-  await supabase.from("notifications").update({ read: true }).eq("id", id);
-}
-
-// App settings
-export async function getSetting(key: string): Promise<string | null> {
-  const { data } = await supabase.from("app_settings").select("value").eq("key", key).maybeSingle();
-  return (data?.value as string | null) ?? null;
-}
-
-export async function setSetting(key: string, value: string | null): Promise<void> {
-  const { data: existing } = await supabase.from("app_settings").select("id").eq("key", key).maybeSingle();
-  if (existing) {
-    await supabase.from("app_settings").update({ value }).eq("key", key);
-  } else {
-    await supabase.from("app_settings").insert({ key, value });
+  for (const r of records) {
+    const id = uuid();
+    const record = {
+      id,
+      personnel_id: r.personnel_id,
+      date: r.date,
+      heure: r.heure,
+      present: r.present,
+      _synced: false,
+      _updated_at: now(),
+    };
+    await db.attendance.add(record);
+    await queueChange("attendance", "insert", id, record);
   }
 }
 
-export async function deleteSetting(key: string): Promise<void> {
-  await supabase.from("app_settings").delete().eq("key", key);
+// ─── Notifications ───
+export async function getNotifications(): Promise<Notification[]> {
+  return (await db.notifications.reverse().sortBy("created_at")).slice(0, 20) as unknown as Notification[];
 }
 
-// Grades
+export async function addNotification(n: Omit<Notification, "id" | "created_at">) {
+  const id = uuid();
+  const record = {
+    id,
+    message: n.message,
+    target_role: n.target_role,
+    read: n.read,
+    created_at: now(),
+    _synced: false,
+    _updated_at: now(),
+  };
+  await db.notifications.add(record);
+  await queueChange("notifications", "insert", id, record);
+}
+
+export async function markNotificationRead(id: string) {
+  const existing = await db.notifications.get(id);
+  if (!existing) return;
+  const updated = { ...existing, read: true, _synced: false, _updated_at: now() };
+  await db.notifications.put(updated);
+  await queueChange("notifications", "update", id, updated);
+}
+
+// ─── App Settings ───
+export async function getSetting(key: string): Promise<string | null> {
+  const row = await db.app_settings.get(key);
+  return row?.value ?? null;
+}
+
+export async function setSetting(key: string, value: string | null): Promise<void> {
+  const record = { key, value, _synced: false, _updated_at: now() };
+  await db.app_settings.put(record);
+  await queueChange("app_settings", "update", key, record);
+}
+
+export async function deleteSetting(key: string): Promise<void> {
+  await db.app_settings.delete(key);
+  await queueChange("app_settings", "delete", key, null);
+}
+
+// ─── Grades ───
 export async function getGrades(): Promise<Grade[]> {
-  const { data } = await supabase.from("grades").select("*").order("created_at", { ascending: false });
-  return (data || []) as Grade[];
+  return (await db.grades.toArray()) as unknown as Grade[];
 }
 
 export async function addGrade(g: Omit<Grade, "id">): Promise<Grade | null> {
-  const { data } = await supabase.from("grades").insert({
-    student_id: g.student_id, matiere: g.matiere, note: g.note,
-    coefficient: g.coefficient, trimestre: g.trimestre,
-    annee_scolaire: g.annee_scolaire, commentaire: g.commentaire,
-  }).select().maybeSingle();
-  return (data || null) as Grade | null;
+  const id = uuid();
+  const record = {
+    id,
+    student_id: g.student_id,
+    matiere: g.matiere,
+    note: g.note,
+    coefficient: g.coefficient,
+    trimestre: g.trimestre,
+    annee_scolaire: g.annee_scolaire,
+    commentaire: g.commentaire,
+    _synced: false,
+    _updated_at: now(),
+  };
+  await db.grades.add(record);
+  await queueChange("grades", "insert", id, record);
+  return { ...record } as unknown as Grade;
 }
