@@ -1,7 +1,9 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { AuthProvider } from "@/hooks/useAuth";
 import { SchoolNameProvider } from "@/hooks/useSchoolName";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { startAutoSync } from "@/lib/syncEngine";
 
 import appCss from "../styles.css?url";
 
@@ -74,6 +76,11 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  useEffect(() => {
+    const cleanup = startAutoSync(30_000);
+    return () => cleanup?.();
+  }, []);
+
   return (
     <AuthProvider>
       <SchoolNameProvider>
