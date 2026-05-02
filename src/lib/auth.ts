@@ -78,11 +78,9 @@ export async function getCurrentUserAsync(): Promise<AppUser | null> {
 
   // Try Supabase first
   try {
-    const { data, error } = await supabase
-      .from("app_users")
-      .select("*")
-      .eq("id", currentUserId)
-      .maybeSingle();
+    const { data, error } = await withTimeout(
+      supabase.from("app_users").select("*").eq("id", currentUserId).maybeSingle()
+    );
     if (!error && data) {
       const user = mapUser(data);
       await cacheUserLocally(user);
