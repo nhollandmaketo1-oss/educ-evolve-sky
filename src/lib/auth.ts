@@ -52,7 +52,7 @@ export async function authenticate(username: string, password: string): Promise<
   // Fallback: check Dexie
   const local = await db.app_users.where("username").equals(username).first();
   if (local && local.password === password) {
-    return mapUser(local as Record<string, unknown>);
+    return mapUser(local as unknown as Record<string, unknown>);
   }
   return null;
 }
@@ -82,7 +82,7 @@ export async function getCurrentUserAsync(): Promise<AppUser | null> {
 
   // Fallback: Dexie
   const local = await db.app_users.get(currentUserId);
-  if (local) return mapUser(local as Record<string, unknown>);
+  if (local) return mapUser(local as unknown as Record<string, unknown>);
 
   return null;
 }
@@ -129,7 +129,7 @@ export async function getAllUsers(): Promise<AppUser[]> {
   }
   // Fallback
   const locals = await db.app_users.toArray();
-  return locals.map((r) => mapUser(r as Record<string, unknown>));
+  return locals.map((r) => mapUser(r as unknown as Record<string, unknown>));
 }
 
 export async function createUser(user: { username: string; password: string; display_name: string; role: UserRole; photo?: string | null; poste?: string; telephone?: string }): Promise<AppUser | null> {
