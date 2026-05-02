@@ -44,12 +44,14 @@ async function cacheUserLocally(user: AppUser) {
 export async function authenticate(username: string, password: string): Promise<AppUser | null> {
   // Try Supabase first
   try {
-    const { data, error } = await supabase
-      .from("app_users")
-      .select("*")
-      .eq("username", username)
-      .eq("password", password)
-      .maybeSingle();
+    const { data, error } = await withTimeout(
+      supabase
+        .from("app_users")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .maybeSingle()
+    );
     if (!error && data) {
       const user = mapUser(data);
       await cacheUserLocally(user);
