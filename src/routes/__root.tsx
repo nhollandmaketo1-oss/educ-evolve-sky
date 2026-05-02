@@ -81,9 +81,9 @@ function RootComponent() {
     return () => cleanup?.();
   }, []);
 
-  // PWA SW registration guard — never register in iframe or preview
+  // PWA SW registration — never register in iframe or preview
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
     const isInIframe = (() => {
       try { return window.self !== window.top; } catch { return true; }
@@ -93,10 +93,20 @@ function RootComponent() {
       window.location.hostname.includes("lovableproject.com");
 
     if (isPreview || isInIframe) {
-      navigator.serviceWorker?.getRegistrations().then((regs) =>
+      navigator.serviceWorker.getRegistrations().then((regs) =>
         regs.forEach((r) => r.unregister())
       );
+      return;
     }
+
+    // Register SW only in production (published app)
+    navigator.serviceWorker.register("/sw.js").then((reg) => {
+      console.log("[SW] Registered, scope:", reg.scope);
+      // Auto-update check every 60s
+      setInterval(() => reg.update(), 60_000);
+    }).catch((err) => {
+      console.warn("[SW] Registration failed:", err);
+    });
   }, []);
 
   return (
