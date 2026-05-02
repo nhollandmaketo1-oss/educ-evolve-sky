@@ -139,7 +139,7 @@ async function handleConflict(item: SyncQueueItem, serverRow: Record<string, unk
 }
 
 async function pullAll() {
-  const tables = ["students", "personnel", "payments", "attendance", "notifications", "grades", "app_settings"] as const;
+  const tables = ["students", "personnel", "payments", "attendance", "notifications", "grades", "app_settings", "app_users"] as const;
 
   for (const table of tables) {
     try {
