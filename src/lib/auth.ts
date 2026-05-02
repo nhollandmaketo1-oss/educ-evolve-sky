@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/lib/offlineDb";
 
 export type UserRole = "dg" | "de" | "gestionnaire";
 
@@ -21,15 +22,39 @@ export function initSession() {
   currentUserId = sessionStorage.getItem("educ_current_user");
 }
 
+/** Cache a user locally in Dexie for offline access */
+async function cacheUserLocally(user: AppUser) {
+  try {
+    await db.app_users.put({ ...user, _synced: true, _updated_at: new Date().toISOString() });
+  } catch (e) {
+    console.warn("[Auth] Failed to cache user locally:", e);
+  }
+}
+
 export async function authenticate(username: string, password: string): Promise<AppUser | null> {
-  const { data, error } = await supabase
-    .from("app_users")
-    .select("*")
-    .eq("username", username)
-    .eq("password", password)
-    .maybeSingle();
-  if (error || !data) return null;
-  return mapUser(data);
+  // Try Supabase first
+  try {
+    const { data, error } = await supabase
+      .from("app_users")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .maybeSingle();
+    if (!error && data) {
+      const user = mapUser(data);
+      await cacheUserLocally(user);
+      return user;
+    }
+  } catch {
+    // Network error — try offline
+  }
+
+  // Fallback: check Dexie
+  const local = await db.app_users.where("username").equals(username).first();
+  if (local && local.password === password) {
+    return mapUser(local as Record<string, unknown>);
+  }
+  return null;
 }
 
 export async function getCurrentUserAsync(): Promise<AppUser | null> {
@@ -38,9 +63,28 @@ export async function getCurrentUserAsync(): Promise<AppUser | null> {
     currentUserId = sessionStorage.getItem("educ_current_user");
   }
   if (!currentUserId) return null;
-  const { data } = await supabase.from("app_users").select("*").eq("id", currentUserId).maybeSingle();
-  if (!data) return null;
-  return mapUser(data);
+
+  // Try Supabase first
+  try {
+    const { data, error } = await supabase
+      .from("app_users")
+      .select("*")
+      .eq("id", currentUserId)
+      .maybeSingle();
+    if (!error && data) {
+      const user = mapUser(data);
+      await cacheUserLocally(user);
+      return user;
+    }
+  } catch {
+    // Network error — try offline
+  }
+
+  // Fallback: Dexie
+  const local = await db.app_users.get(currentUserId);
+  if (local) return mapUser(local as Record<string, unknown>);
+
+  return null;
 }
 
 export function getCurrentUserId(): string | null {
@@ -53,6 +97,8 @@ export function loginUser(user: AppUser) {
   if (typeof window === "undefined") return;
   currentUserId = user.id;
   sessionStorage.setItem("educ_current_user", user.id);
+  // Also cache locally
+  cacheUserLocally(user);
 }
 
 export function logoutUser() {
@@ -64,18 +110,34 @@ export function logoutUser() {
 export async function updateUser(userId: string, updates: { username?: string; password?: string; display_name?: string; photo?: string; poste?: string; telephone?: string }): Promise<AppUser | null> {
   const { data, error } = await supabase.from("app_users").update(updates).eq("id", userId).select().maybeSingle();
   if (error || !data) return null;
-  return mapUser(data);
+  const user = mapUser(data);
+  await cacheUserLocally(user);
+  return user;
 }
 
 export async function getAllUsers(): Promise<AppUser[]> {
-  const { data } = await supabase.from("app_users").select("*").order("created_at");
-  return (data || []).map(mapUser);
+  try {
+    const { data } = await supabase.from("app_users").select("*").order("created_at");
+    if (data) {
+      const users = data.map(mapUser);
+      // Cache all users locally
+      for (const u of users) await cacheUserLocally(u);
+      return users;
+    }
+  } catch {
+    // Offline
+  }
+  // Fallback
+  const locals = await db.app_users.toArray();
+  return locals.map((r) => mapUser(r as Record<string, unknown>));
 }
 
 export async function createUser(user: { username: string; password: string; display_name: string; role: UserRole; photo?: string | null; poste?: string; telephone?: string }): Promise<AppUser | null> {
   const { data, error } = await supabase.from("app_users").insert(user).select().maybeSingle();
   if (error || !data) return null;
-  return mapUser(data);
+  const created = mapUser(data);
+  await cacheUserLocally(created);
+  return created;
 }
 
 export function getRoleLabel(role: UserRole): string {
