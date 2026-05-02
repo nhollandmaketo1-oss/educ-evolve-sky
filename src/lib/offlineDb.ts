@@ -78,6 +78,19 @@ export interface LocalAppSetting {
   _updated_at?: string;
 }
 
+export interface LocalAppUser {
+  id: string;
+  username: string;
+  password: string;
+  role: string;
+  display_name: string;
+  photo?: string | null;
+  poste?: string | null;
+  telephone?: string | null;
+  _synced?: boolean;
+  _updated_at?: string;
+}
+
 export interface SyncQueueItem {
   id?: number;
   table: string;
@@ -95,11 +108,12 @@ class EducDB extends Dexie {
   notifications!: Table<LocalNotification, string>;
   grades!: Table<LocalGrade, string>;
   app_settings!: Table<LocalAppSetting, string>;
+  app_users!: Table<LocalAppUser, string>;
   sync_queue!: Table<SyncQueueItem, number>;
 
   constructor() {
     super("educ2_offline");
-    this.version(1).stores({
+    this.version(2).stores({
       students: "id, classe, status",
       personnel: "id, type",
       payments: "id, student_id, mois, status",
@@ -107,6 +121,7 @@ class EducDB extends Dexie {
       notifications: "id, target_role, read",
       grades: "id, student_id, trimestre",
       app_settings: "key",
+      app_users: "id, username",
       sync_queue: "++id, table, operation",
     });
   }
