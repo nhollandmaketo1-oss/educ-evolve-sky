@@ -2,9 +2,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/offlineDb";
 
 /** Race a promise against a timeout — rejects if the promise doesn't settle in time */
-function withTimeout<T>(promise: Promise<T>, ms = 5000): Promise<T> {
+function withTimeout<T>(promise: PromiseLike<T>, ms = 5000): Promise<T> {
   return Promise.race([
-    promise,
+    Promise.resolve(promise),
     new Promise<never>((_, reject) =>
       setTimeout(() => reject(new Error("timeout")), ms)
     ),
