@@ -81,6 +81,24 @@ function RootComponent() {
     return () => cleanup?.();
   }, []);
 
+  // PWA SW registration guard — never register in iframe or preview
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isInIframe = (() => {
+      try { return window.self !== window.top; } catch { return true; }
+    })();
+    const isPreview =
+      window.location.hostname.includes("id-preview--") ||
+      window.location.hostname.includes("lovableproject.com");
+
+    if (isPreview || isInIframe) {
+      navigator.serviceWorker?.getRegistrations().then((regs) =>
+        regs.forEach((r) => r.unregister())
+      );
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <SchoolNameProvider>
