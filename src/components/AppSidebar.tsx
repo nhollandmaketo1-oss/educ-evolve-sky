@@ -25,6 +25,7 @@ const allNavItems = [
   { icon: Settings, label: "Utilisateurs", to: "/utilisateurs", roles: ["dg"] },
   { icon: Sliders, label: "Paramètres", to: "/parametres", roles: ["dg"] },
   { icon: User, label: "Mon Profil", to: "/profil", roles: ["dg", "de", "gestionnaire"] },
+  { icon: MessageCircle, label: "Messagerie", to: "/messagerie", roles: ["dg", "de", "gestionnaire"] },
 ];
 
 export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
