@@ -39,6 +39,8 @@ function ConflictDialog({ conflict }: { conflict: SyncConflict }) {
 }
 
 export function OfflineBanner() {
+  // Banner masqué — retourner null pour le rendre invisible
+  return null;
   // Self-sufficient online/offline detection — does NOT depend on syncEngine listeners
   const [isOnline, setIsOnline] = useState(() =>
     typeof navigator !== "undefined" ? navigator.onLine : true
