@@ -10,7 +10,7 @@ export const Route = createFileRoute("/messagerie")({
 
 function MessageriePage() {
   return (
-    <AppLayout>
+    <AppLayout title="Messagerie">
       <Suspense fallback={<div className="flex items-center justify-center h-64"><div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" /></div>}>
         <MessagerieModule />
       </Suspense>
