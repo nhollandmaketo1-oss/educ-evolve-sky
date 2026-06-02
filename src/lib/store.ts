@@ -39,6 +39,7 @@ export interface Attendance {
   date: string;
   heure: string;
   present: boolean;
+  heures_effectuees: number;
 }
 
 export interface Notification {
@@ -206,12 +207,21 @@ export async function addAttendanceBulk(records: Omit<Attendance, "id">[]) {
       date: r.date,
       heure: r.heure,
       present: r.present,
+      heures_effectuees: Number(r.heures_effectuees) || 0,
       _synced: false,
       _updated_at: now(),
     };
     await db.attendance.add(record);
     await queueChange("attendance", "insert", id, record);
   }
+}
+
+/** Total hours worked by a personnel for a given month (YYYY-MM). */
+export async function getTotalHoursForMonth(personnelId: string, yearMonth: string): Promise<number> {
+  const all = await db.attendance.where("personnel_id").equals(personnelId).toArray();
+  return all
+    .filter((a) => a.present && a.date.startsWith(yearMonth))
+    .reduce((sum, a) => sum + (Number(a.heures_effectuees) || 0), 0);
 }
 
 // ─── Notifications ───
@@ -240,6 +250,20 @@ export async function markNotificationRead(id: string) {
   const updated = { ...existing, read: true, _synced: false, _updated_at: now() };
   await db.notifications.put(updated);
   await queueChange("notifications", "update", id, updated);
+}
+
+export async function deleteNotification(id: string) {
+  await db.notifications.delete(id);
+  await queueChange("notifications", "delete", id, null);
+}
+
+export async function deleteAllNotifications(role?: string) {
+  const all = await db.notifications.toArray();
+  for (const n of all) {
+    if (role && n.target_role !== role && n.target_role !== "all") continue;
+    await db.notifications.delete(n.id);
+    await queueChange("notifications", "delete", n.id, null);
+  }
 }
 
 // ─── App Settings ───
