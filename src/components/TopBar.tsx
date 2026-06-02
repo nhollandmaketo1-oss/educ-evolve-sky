@@ -2,7 +2,7 @@ import { Bell, Menu, Search, Pencil, Check, X, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchoolName } from "@/hooks/useSchoolName";
-import { getNotifications, markNotificationRead, type Notification } from "@/lib/store";
+import { getNotifications, markNotificationRead, deleteNotification, deleteAllNotifications, type Notification } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
@@ -32,7 +32,17 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
   const handleMarkRead = async (id: string) => {
     await markNotificationRead(id);
     setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
-    setShowNotifs(false);
+  };
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await deleteNotification(id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleClearAll = async () => {
+    await deleteAllNotifications(user?.role);
+    setNotifications([]);
   };
 
   const startEdit = () => {
