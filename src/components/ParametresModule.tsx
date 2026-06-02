@@ -216,6 +216,42 @@ export function ParametresModule() {
           </div>
         </div>
       </section>
+
+      {/* Zone dangereuse — Réinitialisation */}
+      <section className="bg-card rounded-2xl shadow-sm border-2 border-destructive/40 overflow-hidden">
+        <header className="px-5 py-4 border-b border-border flex items-center gap-2 bg-destructive/5">
+          <Trash2 className="w-5 h-5 text-destructive" />
+          <h3 className="font-semibold text-destructive">Zone dangereuse</h3>
+        </header>
+        <div className="p-5 space-y-3">
+          <p className="text-sm text-foreground">
+            <strong>Réinitialiser toutes les données</strong> : supprime définitivement élèves,
+            personnel, paiements, présences, notes, notifications, messages et utilisateurs créés.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Sont préservés : les comptes <strong>DG001</strong>, <strong>DE002</strong>, <strong>GES003</strong>,
+            le nom et le logo de l'école.
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              if (!window.confirm("Cette action est IRRÉVERSIBLE. Êtes-vous certain de vouloir effacer toutes les données ?")) return;
+              if (!window.confirm("Dernière confirmation : toutes les données seront supprimées. Continuer ?")) return;
+              const { resetAllData } = await import("@/lib/store");
+              try {
+                await resetAllData();
+                alert("Toutes les données ont été supprimées. La page va se recharger.");
+                window.location.reload();
+              } catch (e) {
+                alert("Échec de la réinitialisation : " + (e instanceof Error ? e.message : "erreur inconnue"));
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-sm font-semibold hover:opacity-90"
+          >
+            <Trash2 className="w-4 h-4" /> Réinitialiser toutes les données
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

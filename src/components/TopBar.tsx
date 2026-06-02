@@ -2,7 +2,7 @@ import { Bell, Menu, Search, Pencil, Check, X, Trash2 } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchoolName } from "@/hooks/useSchoolName";
-import { getNotifications, markNotificationRead, type Notification } from "@/lib/store";
+import { getNotifications, markNotificationRead, deleteNotification, deleteAllNotifications, type Notification } from "@/lib/store";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 
@@ -32,7 +32,17 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
   const handleMarkRead = async (id: string) => {
     await markNotificationRead(id);
     setNotifications((prev) => prev.map((n) => n.id === id ? { ...n, read: true } : n));
-    setShowNotifs(false);
+  };
+
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    await deleteNotification(id);
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const handleClearAll = async () => {
+    await deleteAllNotifications(user?.role);
+    setNotifications([]);
   };
 
   const startEdit = () => {
@@ -122,15 +132,29 @@ export function TopBar({ title, onMenuToggle }: TopBarProps) {
             )}
           </button>
           {showNotifs && (
-            <div className="absolute right-0 top-12 w-72 bg-card rounded-xl shadow-lg border border-border overflow-hidden z-50">
-              <div className="px-4 py-3 border-b border-border font-semibold text-sm">Notifications</div>
-              <div className="max-h-60 overflow-auto">
+            <div className="absolute right-0 top-12 w-80 bg-card rounded-xl shadow-lg border border-border overflow-hidden z-50">
+              <div className="px-4 py-3 border-b border-border font-semibold text-sm flex items-center justify-between">
+                <span>Notifications</span>
+                {notifications.length > 0 && user?.role === "dg" && (
+                  <button onClick={handleClearAll} className="text-xs text-destructive hover:underline">Tout supprimer</button>
+                )}
+              </div>
+              <div className="max-h-72 overflow-auto">
                 {notifications.length === 0 ? (
                   <p className="px-4 py-3 text-sm text-muted-foreground">Aucune notification</p>
-                ) : notifications.slice(0, 10).map((n) => (
-                  <div key={n.id} className={`px-4 py-3 border-b border-border text-sm cursor-pointer hover:bg-secondary ${!n.read ? "bg-primary/5" : ""}`} onClick={() => handleMarkRead(n.id)}>
-                    <p className="text-foreground">{n.message}</p>
-                    <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("fr-FR")}</p>
+                ) : notifications.slice(0, 15).map((n) => (
+                  <div key={n.id} className={`group flex items-start gap-2 px-4 py-3 border-b border-border text-sm hover:bg-secondary ${!n.read ? "bg-primary/5" : ""}`}>
+                    <div className="flex-1 cursor-pointer" onClick={() => handleMarkRead(n.id)}>
+                      <p className="text-foreground">{n.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("fr-FR")}</p>
+                    </div>
+                    {user?.role === "dg" && (
+                      <button onClick={(e) => handleDelete(n.id, e)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md text-destructive hover:bg-destructive/10"
+                        title="Supprimer">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>

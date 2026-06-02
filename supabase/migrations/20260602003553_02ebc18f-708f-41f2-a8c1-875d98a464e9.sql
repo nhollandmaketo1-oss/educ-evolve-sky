@@ -1,0 +1,1 @@
+ALTER TABLE public.attendance ADD COLUMN IF NOT EXISTS heures_effectuees numeric NOT NULL DEFAULT 0;
