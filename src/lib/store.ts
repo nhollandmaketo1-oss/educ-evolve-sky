@@ -307,3 +307,73 @@ export async function addGrade(g: Omit<Grade, "id">): Promise<Grade | null> {
   await queueChange("grades", "insert", id, record);
   return { ...record } as unknown as Grade;
 }
+
+// ─── Bulk grades for a single student (used by NotesModule) ───
+export async function addGradesBulk(items: Omit<Grade, "id">[]): Promise<void> {
+  for (const g of items) {
+    if (g.note === null || g.note === undefined || Number.isNaN(Number(g.note))) continue;
+    await addGrade(g);
+  }
+}
+
+// ─── Coefficients by class level (Congo system) ───
+export const COEFFICIENTS_CONGO: Record<string, Record<string, number>> = {
+  primaire: {
+    "Français": 5, "Mathématiques": 5, "Anglais": 1, "SVT": 1,
+    "Histoire-Géographie": 2, "EPS": 1, "Éducation Civique": 1,
+    "Dessin": 1, "Musique": 1, "Informatique": 1,
+  },
+  college: {
+    "Français": 4, "Mathématiques": 4, "Anglais": 2, "Physique-Chimie": 2,
+    "SVT": 2, "Histoire-Géographie": 2, "EPS": 1, "Éducation Civique": 1,
+    "Informatique": 1, "Dessin": 1, "Musique": 1,
+  },
+  lycee: {
+    "Français": 3, "Mathématiques": 5, "Anglais": 2, "Physique-Chimie": 4,
+    "SVT": 3, "Histoire-Géographie": 2, "Philosophie": 3, "EPS": 1,
+    "Informatique": 1, "Éducation Civique": 1,
+  },
+};
+
+export function getClassLevel(classe: string): "primaire" | "college" | "lycee" {
+  if (["CP1", "CP2", "CE1", "CE2", "CM1", "CM2"].includes(classe)) return "primaire";
+  if (["6ème", "5ème", "4ème", "3ème"].includes(classe)) return "college";
+  return "lycee";
+}
+
+export function getMatieresForClass(classe: string): { matiere: string; coefficient: number }[] {
+  const map = COEFFICIENTS_CONGO[getClassLevel(classe)] || {};
+  return Object.entries(map).map(([matiere, coefficient]) => ({ matiere, coefficient }));
+}
+
+// ─── Danger: full data reset (preserves only the 3 protected auth users) ───
+const PROTECTED_USERNAMES = ["DG001", "DE002", "GES003"];
+
+export async function resetAllData(): Promise<void> {
+  const tables = ["students", "personnel", "payments", "attendance", "grades", "notifications", "messages"];
+  for (const t of tables) {
+    try {
+      await (supabase.from as unknown as (n: string) => { delete: () => { neq: (c: string, v: string) => Promise<unknown> } })(t)
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+    } catch (e) {
+      console.warn(`[Reset] failed clearing ${t}`, e);
+    }
+  }
+  try {
+    await supabase.from("app_users").delete().not("username", "in", `(${PROTECTED_USERNAMES.map((u) => `"${u}"`).join(",")})`);
+  } catch (e) {
+    console.warn("[Reset] failed clearing non-protected users", e);
+  }
+  try {
+    await supabase.from("app_settings").delete().neq("key", "school_name").neq("key", "school_logo");
+  } catch { /* */ }
+  try {
+    const { data: files } = await supabase.storage.from("message-attachments").list("", { limit: 1000 });
+    if (files && files.length) {
+      const paths = files.map((f) => f.name);
+      await supabase.storage.from("message-attachments").remove(paths);
+    }
+  } catch { /* */ }
+  await wipeLocalData();
+}
