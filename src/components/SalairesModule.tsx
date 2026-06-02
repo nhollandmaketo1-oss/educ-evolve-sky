@@ -71,8 +71,8 @@ export function SalairesModule() {
     // Header
     if (schoolLogo) {
       try {
-        const dataUrl = await imageToDataUrl(schoolLogo);
-        if (dataUrl) pdf.addImage(dataUrl, "PNG", 15, 12, 22, 22);
+        const img = await imageToDataUrl(schoolLogo);
+        if (img) pdf.addImage(img.dataUrl, img.format, 15, 12, 22, 22);
       } catch { /* */ }
     }
     pdf.setFontSize(16);
