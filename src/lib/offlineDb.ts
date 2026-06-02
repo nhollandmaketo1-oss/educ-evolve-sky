@@ -44,6 +44,7 @@ export interface LocalAttendance {
   date: string;
   heure: string;
   present: boolean;
+  heures_effectuees: number;
   _synced?: boolean;
   _updated_at?: string;
 }
@@ -91,6 +92,22 @@ export interface LocalAppUser {
   _updated_at?: string;
 }
 
+export interface LocalMessage {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  content: string | null;
+  attachment_type: string | null;
+  attachment_url: string | null;
+  attachment_name: string | null;
+  read: boolean;
+  created_at: string;
+  _pending?: boolean; // pending send (offline)
+  _localBlob?: Blob | null; // for offline attachments to upload later
+  _synced?: boolean;
+  _updated_at?: string;
+}
+
 export interface SyncQueueItem {
   id?: number;
   table: string;
@@ -109,6 +126,7 @@ class EducDB extends Dexie {
   grades!: Table<LocalGrade, string>;
   app_settings!: Table<LocalAppSetting, string>;
   app_users!: Table<LocalAppUser, string>;
+  messages!: Table<LocalMessage, string>;
   sync_queue!: Table<SyncQueueItem, number>;
 
   constructor() {
@@ -124,7 +142,33 @@ class EducDB extends Dexie {
       app_users: "id, username",
       sync_queue: "++id, table, operation",
     });
+    this.version(3).stores({
+      students: "id, classe, status",
+      personnel: "id, type",
+      payments: "id, student_id, mois, status",
+      attendance: "id, personnel_id, date",
+      notifications: "id, target_role, read",
+      grades: "id, student_id, trimestre",
+      app_settings: "key",
+      app_users: "id, username",
+      messages: "id, sender_id, receiver_id, created_at, _pending",
+      sync_queue: "++id, table, operation",
+    });
   }
 }
 
 export const db = new EducDB();
+
+/** Wipe all local data except auth-related caches (app_users, app_settings) */
+export async function wipeLocalData() {
+  await Promise.all([
+    db.students.clear(),
+    db.personnel.clear(),
+    db.payments.clear(),
+    db.attendance.clear(),
+    db.notifications.clear(),
+    db.grades.clear(),
+    db.messages.clear(),
+    db.sync_queue.clear(),
+  ]);
+}
