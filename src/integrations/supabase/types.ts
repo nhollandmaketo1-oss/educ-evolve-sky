@@ -81,6 +81,7 @@ export type Database = {
         Row: {
           date: string
           heure: string
+          heures_effectuees: number
           id: string
           personnel_id: string
           present: boolean
@@ -88,6 +89,7 @@ export type Database = {
         Insert: {
           date: string
           heure: string
+          heures_effectuees?: number
           id?: string
           personnel_id: string
           present?: boolean
@@ -95,6 +97,7 @@ export type Database = {
         Update: {
           date?: string
           heure?: string
+          heures_effectuees?: number
           id?: string
           personnel_id?: string
           present?: boolean
