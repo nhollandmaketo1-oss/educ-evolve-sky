@@ -23,11 +23,20 @@ const DEFAULT_USER_SALARIES: Record<string, number> = {
   gestionnaire: 200000,
 };
 
+const HOURLY_RATES_KEY = "educ_hourly_rates_v1";
+const loadRates = (): Record<string, number> => {
+  try { return JSON.parse(localStorage.getItem(HOURLY_RATES_KEY) || "{}"); } catch { return {}; }
+};
+const saveRates = (r: Record<string, number>) => {
+  try { localStorage.setItem(HOURLY_RATES_KEY, JSON.stringify(r)); } catch { /* */ }
+};
+
 export function SalairesModule() {
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [hourlyRates, setHourlyRates] = useState<Record<string, number>>(() => loadRates());
   const schoolName = useSchoolDisplayName();
   const schoolLogo = useSchoolLogo();
 
@@ -36,6 +45,14 @@ export function SalairesModule() {
     getAttendance().then(setAttendance);
     getAllUsers().then(setUsers);
   }, []);
+
+  const updateRate = (id: string, val: number) => {
+    setHourlyRates((prev) => {
+      const next = { ...prev, [id]: val };
+      saveRates(next);
+      return next;
+    });
+  };
 
   const monthlyHours = (personnelId: string) =>
     attendance
