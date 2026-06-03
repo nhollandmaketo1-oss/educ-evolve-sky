@@ -6,17 +6,44 @@ import loginBg from "@/assets/login-bg.jpg.asset.json";
 
 function playWelcomeSound() {
   try {
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(
-      "Bienvenue sur EDUC 2.0, votre système intelligent de gestion scolaire."
-    );
-    u.lang = "fr-FR";
-    u.rate = 0.95;
-    u.pitch = 1.05;
-    synth.speak(u);
-  } catch { /* offline-friendly: silent fallback */ }
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.0001, now);
+    master.gain.exponentialRampToValueAtTime(0.25, now + 0.05);
+    master.gain.exponentialRampToValueAtTime(0.0001, now + 3);
+    master.connect(ctx.destination);
+
+    // Petite symphonie: arpège majestueux Do-Mi-Sol-Do (3s)
+    const notes: Array<{ f: number; t: number; d: number }> = [
+      { f: 523.25, t: 0.00, d: 0.7 },  // C5
+      { f: 659.25, t: 0.35, d: 0.7 },  // E5
+      { f: 783.99, t: 0.70, d: 0.9 },  // G5
+      { f: 1046.5, t: 1.05, d: 1.8 },  // C6 (tenu)
+      { f: 392.00, t: 1.05, d: 1.8 },  // G4 (basse)
+      { f: 261.63, t: 1.05, d: 1.8 },  // C4 (fondamentale)
+    ];
+
+    notes.forEach(({ f, t, d }) => {
+      ["triangle", "sine"].forEach((type, i) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.type = type as OscillatorType;
+        osc.frequency.value = f * (i === 1 ? 2 : 1);
+        g.gain.setValueAtTime(0.0001, now + t);
+        g.gain.exponentialRampToValueAtTime(i === 1 ? 0.15 : 0.4, now + t + 0.04);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
+        osc.connect(g);
+        g.connect(master);
+        osc.start(now + t);
+        osc.stop(now + t + d + 0.05);
+      });
+    });
+
+    setTimeout(() => ctx.close(), 3300);
+  } catch { /* silent fallback */ }
 }
 
 export function LoginPage() {
