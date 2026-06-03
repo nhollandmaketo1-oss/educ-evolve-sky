@@ -1,7 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GraduationCap, Eye, EyeOff } from "lucide-react";
 import { authenticate, loginUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
+import loginBg from "@/assets/login-bg.jpg.asset.json";
+
+function playWelcomeSound() {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth) return;
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(
+      "Bienvenue sur EDUC 2.0, votre système intelligent de gestion scolaire."
+    );
+    u.lang = "fr-FR";
+    u.rate = 0.95;
+    u.pitch = 1.05;
+    synth.speak(u);
+  } catch { /* offline-friendly: silent fallback */ }
+}
 
 export function LoginPage() {
   const { refresh } = useAuth();
@@ -10,6 +26,15 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  useEffect(() => {
+    if (!showWelcome) return;
+    // Wait a tick so voices have loaded, then speak
+    const t1 = setTimeout(() => playWelcomeSound(), 250);
+    const t2 = setTimeout(() => setShowWelcome(false), 3800);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [showWelcome]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,8 +50,42 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-primary px-4">
-      <div className="bg-card rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 overflow-hidden">
+      {/* Background image at 40% opacity */}
+      <div
+        aria-hidden
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `url(${loginBg.url})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.4,
+        }}
+      />
+      <div aria-hidden className="absolute inset-0 bg-primary/40 pointer-events-none" />
+
+      {/* Welcome splash */}
+      {showWelcome && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-primary/85 backdrop-blur-sm animate-in fade-in duration-500">
+          <div className="w-24 h-24 rounded-full bg-white/15 flex items-center justify-center mb-5 animate-pulse">
+            <GraduationCap className="w-12 h-12 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-white font-[family-name:var(--font-display)] tracking-wide">
+            BIENVENUE
+          </h1>
+          <p className="text-white/90 text-base mt-2">sur EDUC 2.0</p>
+          <p className="text-white/70 text-xs mt-4 italic">Système Intelligent de Gestion Scolaire</p>
+          <button
+            onClick={() => setShowWelcome(false)}
+            className="mt-8 px-5 py-2 rounded-full bg-white/15 hover:bg-white/25 text-white text-sm transition-colors"
+          >
+            Continuer
+          </button>
+        </div>
+      )}
+
+      {/* Login card */}
+      <div className="relative z-10 bg-card rounded-2xl shadow-2xl p-8 w-full max-w-md">
         <div className="flex flex-col items-center mb-6">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <GraduationCap className="w-10 h-10 text-primary" />
@@ -54,7 +113,50 @@ export function LoginPage() {
           </button>
         </form>
       </div>
-      <p className="mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
+
+      <p className="relative z-10 mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
+
+      {/* 3D credits bottom */}
+      <div className="relative z-10 mt-6 flex flex-col items-center text-center select-none">
+        <span
+          className="text-lg sm:text-xl font-extrabold tracking-wider"
+          style={{
+            color: "#87CEEB",
+            WebkitTextStroke: "1px #FFD700",
+            textShadow:
+              "0 1px 0 #1a3a6e, 0 2px 0 #14305c, 0 3px 0 #0f2549, 0 4px 6px rgba(0,0,0,0.55), 0 0 2px #ffffff",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          PROPULSÉ PAR (SOUS MAKETO NHOLLAND)
+        </span>
+        <span
+          className="mt-2 text-base sm:text-lg font-extrabold italic tracking-wide"
+          style={{
+            color: "#bfe3ff",
+            WebkitTextStroke: "1px #ffffff",
+            textShadow:
+              "0 1px 0 #15366a, 0 2px 0 #102a55, 0 3px 0 #0a1f40, 0 4px 8px rgba(0,0,0,0.6), 0 0 2px #FFD700",
+            fontFamily: "var(--font-display)",
+          }}
+        >
+          Oliver Fix Service — DU 2 JUIN 2026
+        </span>
+      </div>
+
+      {/* Version bottom-left */}
+      <span
+        className="absolute bottom-2 left-3 z-10 text-[10px] font-bold tracking-widest"
+        style={{
+          background: "linear-gradient(90deg, #C0C0C0 0%, #FFD700 50%, #C0C0C0 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          textShadow: "0 1px 1px rgba(0,0,0,0.4)",
+        }}
+      >
+        V 04.03.90
+      </span>
     </div>
   );
 }

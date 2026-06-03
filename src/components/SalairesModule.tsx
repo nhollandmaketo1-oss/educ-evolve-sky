@@ -23,11 +23,20 @@ const DEFAULT_USER_SALARIES: Record<string, number> = {
   gestionnaire: 200000,
 };
 
+const HOURLY_RATES_KEY = "educ_hourly_rates_v1";
+const loadRates = (): Record<string, number> => {
+  try { return JSON.parse(localStorage.getItem(HOURLY_RATES_KEY) || "{}"); } catch { return {}; }
+};
+const saveRates = (r: Record<string, number>) => {
+  try { localStorage.setItem(HOURLY_RATES_KEY, JSON.stringify(r)); } catch { /* */ }
+};
+
 export function SalairesModule() {
   const [personnel, setPersonnel] = useState<Personnel[]>([]);
   const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [month, setMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [hourlyRates, setHourlyRates] = useState<Record<string, number>>(() => loadRates());
   const schoolName = useSchoolDisplayName();
   const schoolLogo = useSchoolLogo();
 
@@ -36,6 +45,14 @@ export function SalairesModule() {
     getAttendance().then(setAttendance);
     getAllUsers().then(setUsers);
   }, []);
+
+  const updateRate = (id: string, val: number) => {
+    setHourlyRates((prev) => {
+      const next = { ...prev, [id]: val };
+      saveRates(next);
+      return next;
+    });
+  };
 
   const monthlyHours = (personnelId: string) =>
     attendance
@@ -99,15 +116,16 @@ export function SalairesModule() {
 
     // Pay details
     const heuresLigne = person.hours > 0 ? person.hours : null;
-    const tauxHoraire = heuresLigne ? Math.round(person.salaire_base / 160) : 0; // standard 160h/month
+    const tauxHoraire = hourlyRates[person.id] || 0;
     const partHoraire = heuresLigne ? heuresLigne * tauxHoraire : 0;
-    const brut = person.salaire_base + (heuresLigne ? Math.max(0, partHoraire - person.salaire_base) : 0);
+    const brut = person.salaire_base + partHoraire;
     const netLignes: [string, string][] = [
       ["Salaire de base", `${person.salaire_base.toLocaleString()} FCFA`],
     ];
     if (heuresLigne) {
       netLignes.push(["Heures effectuées", `${heuresLigne} h`]);
-      netLignes.push(["Taux horaire (réf.)", `${tauxHoraire.toLocaleString()} FCFA/h`]);
+      netLignes.push(["Prix de l'heure", `${tauxHoraire.toLocaleString()} FCFA/h`]);
+      netLignes.push(["Total heures", `${partHoraire.toLocaleString()} FCFA`]);
     }
     netLignes.push(["Net à payer", `${brut.toLocaleString()} FCFA`]);
 
@@ -185,11 +203,12 @@ export function SalairesModule() {
               <th className="text-left px-4 py-3 font-medium">Fonction</th>
               <th className="text-left px-4 py-3 font-medium">Salaire de base</th>
               <th className="text-left px-4 py-3 font-medium">Heures effectuées</th>
+              <th className="text-left px-4 py-3 font-medium">Prix / heure (FCFA)</th>
               <th className="text-right px-4 py-3 font-medium">Action</th>
             </tr></thead>
             <tbody>
               {payList.length === 0 ? (
-                <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Aucun bénéficiaire</td></tr>
+                <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Aucun bénéficiaire</td></tr>
               ) : payList.map((p) => (
                 <tr key={p.id} className="border-t border-border hover:bg-secondary/50">
                   <td className="px-4 py-3 font-medium flex items-center gap-2">
@@ -202,6 +221,13 @@ export function SalairesModule() {
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-primary">
                       <Clock className="w-3 h-3" /> {p.hours} h
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input type="number" min={0} step={100}
+                      value={hourlyRates[p.id] ?? ""}
+                      onChange={(e) => updateRate(p.id, Number(e.target.value) || 0)}
+                      placeholder="0"
+                      className="w-28 px-2 py-1.5 rounded-lg bg-input text-foreground text-xs border border-border focus:outline-none focus:ring-2 focus:ring-primary" />
                   </td>
                   <td className="px-4 py-3 text-right">
                     <button onClick={() => generateBulletin(p)}
