@@ -76,12 +76,14 @@ export async function uploadStaffDocument(personnelId: string, file: File, type:
   const path = `${personnelId}/${Date.now()}-${file.name}`;
   const { error: upErr } = await supabase.storage.from("staff-documents").upload(path, file, { upsert: true });
   if (upErr) { console.warn("[HR] upload", upErr); return null; }
-  const { data: { publicUrl } } = supabase.storage.from("staff-documents").getPublicUrl(path);
+  // Private bucket → generate a long-lived signed URL (1 year)
+  const { data: signed } = await supabase.storage.from("staff-documents").createSignedUrl(path, 60 * 60 * 24 * 365);
+  const url = signed?.signedUrl || path;
   const { data, error } = await supabase.from("staff_documents").insert({
     personnel_id: personnelId,
     nom: file.name,
     type,
-    url: publicUrl,
+    url,
   }).select().maybeSingle();
   if (error) { console.warn("[HR] insert doc", error); return null; }
   return data as StaffDocument;
