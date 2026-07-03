@@ -23,6 +23,11 @@ export interface Personnel {
   salaire: number;
   telephone: string | null;
   photo: string | null;
+  niveau?: string | null;
+  email?: string | null;
+  adresse?: string | null;
+  date_embauche?: string | null;
+  diplomes?: string | null;
 }
 
 export interface Payment {
@@ -138,6 +143,11 @@ export async function addPersonnel(p: Omit<Personnel, "id">): Promise<Personnel 
     salaire: p.salaire,
     telephone: p.telephone,
     photo: p.photo,
+    niveau: p.niveau ?? null,
+    email: p.email ?? null,
+    adresse: p.adresse ?? null,
+    date_embauche: p.date_embauche ?? null,
+    diplomes: p.diplomes ?? null,
     _synced: false,
     _updated_at: now(),
   };
