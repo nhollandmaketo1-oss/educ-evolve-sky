@@ -1,10 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, CreditCard, UserCog, Wallet, ClipboardCheck,
-  BarChart3, FileText, Settings, LogOut, GraduationCap, User, BookOpen, Sliders, MessageCircle
+  BarChart3, FileText, Settings, LogOut, GraduationCap, User, BookOpen, Sliders, MessageCircle,
+  IdCard, LineChart,
 } from "lucide-react";
 import { useSchoolDisplayName, useSchoolLogo } from "@/hooks/useSchoolName";
-import { type UserRole, getRoleLabel, logoutUser } from "@/lib/auth";
+import { getRoleLabel, logoutUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
@@ -13,19 +14,21 @@ interface SidebarProps {
 }
 
 const allNavItems = [
-  { icon: LayoutDashboard, label: "Tableau de bord", to: "/", roles: ["dg", "de", "gestionnaire"] },
+  { icon: LayoutDashboard, label: "Tableau de bord", to: "/", roles: ["dg", "de", "gestionnaire", "comptable"] },
   { icon: Users, label: "Élèves", to: "/eleves", roles: ["dg", "de", "gestionnaire"] },
-  { icon: CreditCard, label: "Paiements", to: "/paiements", roles: ["dg", "gestionnaire"] },
+  { icon: CreditCard, label: "Paiements", to: "/paiements", roles: ["dg", "gestionnaire", "comptable"] },
   { icon: UserCog, label: "Personnel", to: "/personnel", roles: ["dg", "de"] },
-  { icon: Wallet, label: "Salaires", to: "/salaires", roles: ["dg", "gestionnaire"] },
+  { icon: IdCard, label: "Profils & Contrats", to: "/profils-contrats", roles: ["dg", "de", "comptable"] },
+  { icon: LineChart, label: "Évaluation performance", to: "/evaluations", roles: ["dg", "de"] },
+  { icon: Wallet, label: "Salaires", to: "/salaires", roles: ["dg", "gestionnaire", "comptable"] },
   { icon: ClipboardCheck, label: "Présences", to: "/presences", roles: ["dg", "de"] },
   { icon: BookOpen, label: "Notes", to: "/notes", roles: ["dg", "de"] },
   { icon: BarChart3, label: "Statistiques", to: "/statistiques", roles: ["dg", "de"] },
-  { icon: FileText, label: "Rapports", to: "/rapports", roles: ["dg", "de", "gestionnaire"] },
+  { icon: FileText, label: "Rapports", to: "/rapports", roles: ["dg", "de", "gestionnaire", "comptable"] },
   { icon: Settings, label: "Utilisateurs", to: "/utilisateurs", roles: ["dg"] },
   { icon: Sliders, label: "Paramètres", to: "/parametres", roles: ["dg"] },
-  { icon: User, label: "Mon Profil", to: "/profil", roles: ["dg", "de", "gestionnaire"] },
-  { icon: MessageCircle, label: "Messagerie", to: "/messagerie", roles: ["dg", "de", "gestionnaire"] },
+  { icon: User, label: "Mon Profil", to: "/profil", roles: ["dg", "de", "gestionnaire", "comptable"] },
+  { icon: MessageCircle, label: "Messagerie", to: "/messagerie", roles: ["dg", "de", "gestionnaire", "comptable"] },
 ];
 
 export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {

@@ -11,7 +11,7 @@ function withTimeout<T>(promise: PromiseLike<T>, ms = 5000): Promise<T> {
   ]);
 }
 
-export type UserRole = "dg" | "de" | "gestionnaire";
+export type UserRole = "dg" | "de" | "gestionnaire" | "comptable";
 
 export interface AppUser {
   id: string;
@@ -155,6 +155,7 @@ export function getRoleLabel(role: UserRole): string {
     case "dg": return "Directeur Général";
     case "de": return "Directeur d'Études";
     case "gestionnaire": return "Gestionnaire";
+    case "comptable": return "Comptable";
   }
 }
 
