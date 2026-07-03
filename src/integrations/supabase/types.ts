@@ -112,6 +112,53 @@ export type Database = {
           },
         ]
       }
+      contracts: {
+        Row: {
+          created_at: string
+          date_debut: string
+          date_fin: string | null
+          id: string
+          notes: string | null
+          personnel_id: string
+          salaire: number
+          statut: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_debut: string
+          date_fin?: string | null
+          id?: string
+          notes?: string | null
+          personnel_id: string
+          salaire?: number
+          statut?: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_debut?: string
+          date_fin?: string | null
+          id?: string
+          notes?: string | null
+          personnel_id?: string
+          salaire?: number
+          statut?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contracts_personnel_id_fkey"
+            columns: ["personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       grades: {
         Row: {
           annee_scolaire: string
@@ -251,11 +298,69 @@ export type Database = {
           },
         ]
       }
+      performance_evaluations: {
+        Row: {
+          commentaire: string | null
+          created_at: string
+          discipline: number
+          id: string
+          note_globale: number
+          objectifs: string | null
+          participation: number
+          pedagogie: number
+          periode: string
+          personnel_id: string
+          ponctualite: number
+          updated_at: string
+        }
+        Insert: {
+          commentaire?: string | null
+          created_at?: string
+          discipline?: number
+          id?: string
+          note_globale?: number
+          objectifs?: string | null
+          participation?: number
+          pedagogie?: number
+          periode: string
+          personnel_id: string
+          ponctualite?: number
+          updated_at?: string
+        }
+        Update: {
+          commentaire?: string | null
+          created_at?: string
+          discipline?: number
+          id?: string
+          note_globale?: number
+          objectifs?: string | null
+          participation?: number
+          pedagogie?: number
+          periode?: string
+          personnel_id?: string
+          ponctualite?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_evaluations_personnel_id_fkey"
+            columns: ["personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       personnel: {
         Row: {
+          adresse: string | null
           created_at: string
+          date_embauche: string | null
+          diplomes: string | null
+          email: string | null
           id: string
           matiere: string | null
+          niveau: string | null
           nom: string
           photo: string | null
           prenom: string
@@ -264,9 +369,14 @@ export type Database = {
           type: string
         }
         Insert: {
+          adresse?: string | null
           created_at?: string
+          date_embauche?: string | null
+          diplomes?: string | null
+          email?: string | null
           id?: string
           matiere?: string | null
+          niveau?: string | null
           nom: string
           photo?: string | null
           prenom: string
@@ -275,9 +385,14 @@ export type Database = {
           type: string
         }
         Update: {
+          adresse?: string | null
           created_at?: string
+          date_embauche?: string | null
+          diplomes?: string | null
+          email?: string | null
           id?: string
           matiere?: string | null
+          niveau?: string | null
           nom?: string
           photo?: string | null
           prenom?: string
@@ -286,6 +401,41 @@ export type Database = {
           type?: string
         }
         Relationships: []
+      }
+      staff_documents: {
+        Row: {
+          created_at: string
+          id: string
+          nom: string
+          personnel_id: string
+          type: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          nom: string
+          personnel_id: string
+          type?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          nom?: string
+          personnel_id?: string
+          type?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_documents_personnel_id_fkey"
+            columns: ["personnel_id"]
+            isOneToOne: false
+            referencedRelation: "personnel"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
