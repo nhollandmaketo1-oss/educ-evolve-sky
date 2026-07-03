@@ -13,6 +13,7 @@ import { Route as UtilisateursRouteImport } from './routes/utilisateurs'
 import { Route as StatistiquesRouteImport } from './routes/statistiques'
 import { Route as SalairesRouteImport } from './routes/salaires'
 import { Route as RapportsRouteImport } from './routes/rapports'
+import { Route as ProfilsContratsRouteImport } from './routes/profils-contrats'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as PresencesRouteImport } from './routes/presences'
 import { Route as PersonnelRouteImport } from './routes/personnel'
@@ -20,6 +21,7 @@ import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as PaiementsRouteImport } from './routes/paiements'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as MessagerieRouteImport } from './routes/messagerie'
+import { Route as EvaluationsRouteImport } from './routes/evaluations'
 import { Route as ElevesRouteImport } from './routes/eleves'
 import { Route as IndexRouteImport } from './routes/index'
 
@@ -41,6 +43,11 @@ const SalairesRoute = SalairesRouteImport.update({
 const RapportsRoute = RapportsRouteImport.update({
   id: '/rapports',
   path: '/rapports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilsContratsRoute = ProfilsContratsRouteImport.update({
+  id: '/profils-contrats',
+  path: '/profils-contrats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProfilRoute = ProfilRouteImport.update({
@@ -78,6 +85,11 @@ const MessagerieRoute = MessagerieRouteImport.update({
   path: '/messagerie',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EvaluationsRoute = EvaluationsRouteImport.update({
+  id: '/evaluations',
+  path: '/evaluations',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ElevesRoute = ElevesRouteImport.update({
   id: '/eleves',
   path: '/eleves',
@@ -92,6 +104,7 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/eleves': typeof ElevesRoute
+  '/evaluations': typeof EvaluationsRoute
   '/messagerie': typeof MessagerieRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
@@ -99,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
   '/profil': typeof ProfilRoute
+  '/profils-contrats': typeof ProfilsContratsRoute
   '/rapports': typeof RapportsRoute
   '/salaires': typeof SalairesRoute
   '/statistiques': typeof StatistiquesRoute
@@ -107,6 +121,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/eleves': typeof ElevesRoute
+  '/evaluations': typeof EvaluationsRoute
   '/messagerie': typeof MessagerieRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
@@ -114,6 +129,7 @@ export interface FileRoutesByTo {
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
   '/profil': typeof ProfilRoute
+  '/profils-contrats': typeof ProfilsContratsRoute
   '/rapports': typeof RapportsRoute
   '/salaires': typeof SalairesRoute
   '/statistiques': typeof StatistiquesRoute
@@ -123,6 +139,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/eleves': typeof ElevesRoute
+  '/evaluations': typeof EvaluationsRoute
   '/messagerie': typeof MessagerieRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
@@ -130,6 +147,7 @@ export interface FileRoutesById {
   '/personnel': typeof PersonnelRoute
   '/presences': typeof PresencesRoute
   '/profil': typeof ProfilRoute
+  '/profils-contrats': typeof ProfilsContratsRoute
   '/rapports': typeof RapportsRoute
   '/salaires': typeof SalairesRoute
   '/statistiques': typeof StatistiquesRoute
@@ -140,6 +158,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/eleves'
+    | '/evaluations'
     | '/messagerie'
     | '/notes'
     | '/paiements'
@@ -147,6 +166,7 @@ export interface FileRouteTypes {
     | '/personnel'
     | '/presences'
     | '/profil'
+    | '/profils-contrats'
     | '/rapports'
     | '/salaires'
     | '/statistiques'
@@ -155,6 +175,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/eleves'
+    | '/evaluations'
     | '/messagerie'
     | '/notes'
     | '/paiements'
@@ -162,6 +183,7 @@ export interface FileRouteTypes {
     | '/personnel'
     | '/presences'
     | '/profil'
+    | '/profils-contrats'
     | '/rapports'
     | '/salaires'
     | '/statistiques'
@@ -170,6 +192,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/eleves'
+    | '/evaluations'
     | '/messagerie'
     | '/notes'
     | '/paiements'
@@ -177,6 +200,7 @@ export interface FileRouteTypes {
     | '/personnel'
     | '/presences'
     | '/profil'
+    | '/profils-contrats'
     | '/rapports'
     | '/salaires'
     | '/statistiques'
@@ -186,6 +210,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ElevesRoute: typeof ElevesRoute
+  EvaluationsRoute: typeof EvaluationsRoute
   MessagerieRoute: typeof MessagerieRoute
   NotesRoute: typeof NotesRoute
   PaiementsRoute: typeof PaiementsRoute
@@ -193,6 +218,7 @@ export interface RootRouteChildren {
   PersonnelRoute: typeof PersonnelRoute
   PresencesRoute: typeof PresencesRoute
   ProfilRoute: typeof ProfilRoute
+  ProfilsContratsRoute: typeof ProfilsContratsRoute
   RapportsRoute: typeof RapportsRoute
   SalairesRoute: typeof SalairesRoute
   StatistiquesRoute: typeof StatistiquesRoute
@@ -227,6 +253,13 @@ declare module '@tanstack/react-router' {
       path: '/rapports'
       fullPath: '/rapports'
       preLoaderRoute: typeof RapportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profils-contrats': {
+      id: '/profils-contrats'
+      path: '/profils-contrats'
+      fullPath: '/profils-contrats'
+      preLoaderRoute: typeof ProfilsContratsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/profil': {
@@ -278,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagerieRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/evaluations': {
+      id: '/evaluations'
+      path: '/evaluations'
+      fullPath: '/evaluations'
+      preLoaderRoute: typeof EvaluationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/eleves': {
       id: '/eleves'
       path: '/eleves'
@@ -298,6 +338,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ElevesRoute: ElevesRoute,
+  EvaluationsRoute: EvaluationsRoute,
   MessagerieRoute: MessagerieRoute,
   NotesRoute: NotesRoute,
   PaiementsRoute: PaiementsRoute,
@@ -305,6 +346,7 @@ const rootRouteChildren: RootRouteChildren = {
   PersonnelRoute: PersonnelRoute,
   PresencesRoute: PresencesRoute,
   ProfilRoute: ProfilRoute,
+  ProfilsContratsRoute: ProfilsContratsRoute,
   RapportsRoute: RapportsRoute,
   SalairesRoute: SalairesRoute,
   StatistiquesRoute: StatistiquesRoute,
