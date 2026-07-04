@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UtilisateursRouteImport } from './routes/utilisateurs'
 import { Route as StatistiquesRouteImport } from './routes/statistiques'
 import { Route as SalairesRouteImport } from './routes/salaires'
+import { Route as RapportsFinanciersRouteImport } from './routes/rapports-financiers'
 import { Route as RapportsRouteImport } from './routes/rapports'
 import { Route as ProfilsContratsRouteImport } from './routes/profils-contrats'
 import { Route as ProfilRouteImport } from './routes/profil'
@@ -23,6 +24,7 @@ import { Route as NotesRouteImport } from './routes/notes'
 import { Route as MessagerieRouteImport } from './routes/messagerie'
 import { Route as EvaluationsRouteImport } from './routes/evaluations'
 import { Route as ElevesRouteImport } from './routes/eleves'
+import { Route as DepensesRouteImport } from './routes/depenses'
 import { Route as IndexRouteImport } from './routes/index'
 
 const UtilisateursRoute = UtilisateursRouteImport.update({
@@ -38,6 +40,11 @@ const StatistiquesRoute = StatistiquesRouteImport.update({
 const SalairesRoute = SalairesRouteImport.update({
   id: '/salaires',
   path: '/salaires',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RapportsFinanciersRoute = RapportsFinanciersRouteImport.update({
+  id: '/rapports-financiers',
+  path: '/rapports-financiers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RapportsRoute = RapportsRouteImport.update({
@@ -95,6 +102,11 @@ const ElevesRoute = ElevesRouteImport.update({
   path: '/eleves',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DepensesRoute = DepensesRouteImport.update({
+  id: '/depenses',
+  path: '/depenses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -103,6 +115,7 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/depenses': typeof DepensesRoute
   '/eleves': typeof ElevesRoute
   '/evaluations': typeof EvaluationsRoute
   '/messagerie': typeof MessagerieRoute
@@ -114,12 +127,14 @@ export interface FileRoutesByFullPath {
   '/profil': typeof ProfilRoute
   '/profils-contrats': typeof ProfilsContratsRoute
   '/rapports': typeof RapportsRoute
+  '/rapports-financiers': typeof RapportsFinanciersRoute
   '/salaires': typeof SalairesRoute
   '/statistiques': typeof StatistiquesRoute
   '/utilisateurs': typeof UtilisateursRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/depenses': typeof DepensesRoute
   '/eleves': typeof ElevesRoute
   '/evaluations': typeof EvaluationsRoute
   '/messagerie': typeof MessagerieRoute
@@ -131,6 +146,7 @@ export interface FileRoutesByTo {
   '/profil': typeof ProfilRoute
   '/profils-contrats': typeof ProfilsContratsRoute
   '/rapports': typeof RapportsRoute
+  '/rapports-financiers': typeof RapportsFinanciersRoute
   '/salaires': typeof SalairesRoute
   '/statistiques': typeof StatistiquesRoute
   '/utilisateurs': typeof UtilisateursRoute
@@ -138,6 +154,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/depenses': typeof DepensesRoute
   '/eleves': typeof ElevesRoute
   '/evaluations': typeof EvaluationsRoute
   '/messagerie': typeof MessagerieRoute
@@ -149,6 +166,7 @@ export interface FileRoutesById {
   '/profil': typeof ProfilRoute
   '/profils-contrats': typeof ProfilsContratsRoute
   '/rapports': typeof RapportsRoute
+  '/rapports-financiers': typeof RapportsFinanciersRoute
   '/salaires': typeof SalairesRoute
   '/statistiques': typeof StatistiquesRoute
   '/utilisateurs': typeof UtilisateursRoute
@@ -157,6 +175,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/depenses'
     | '/eleves'
     | '/evaluations'
     | '/messagerie'
@@ -168,12 +187,14 @@ export interface FileRouteTypes {
     | '/profil'
     | '/profils-contrats'
     | '/rapports'
+    | '/rapports-financiers'
     | '/salaires'
     | '/statistiques'
     | '/utilisateurs'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/depenses'
     | '/eleves'
     | '/evaluations'
     | '/messagerie'
@@ -185,12 +206,14 @@ export interface FileRouteTypes {
     | '/profil'
     | '/profils-contrats'
     | '/rapports'
+    | '/rapports-financiers'
     | '/salaires'
     | '/statistiques'
     | '/utilisateurs'
   id:
     | '__root__'
     | '/'
+    | '/depenses'
     | '/eleves'
     | '/evaluations'
     | '/messagerie'
@@ -202,6 +225,7 @@ export interface FileRouteTypes {
     | '/profil'
     | '/profils-contrats'
     | '/rapports'
+    | '/rapports-financiers'
     | '/salaires'
     | '/statistiques'
     | '/utilisateurs'
@@ -209,6 +233,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DepensesRoute: typeof DepensesRoute
   ElevesRoute: typeof ElevesRoute
   EvaluationsRoute: typeof EvaluationsRoute
   MessagerieRoute: typeof MessagerieRoute
@@ -220,6 +245,7 @@ export interface RootRouteChildren {
   ProfilRoute: typeof ProfilRoute
   ProfilsContratsRoute: typeof ProfilsContratsRoute
   RapportsRoute: typeof RapportsRoute
+  RapportsFinanciersRoute: typeof RapportsFinanciersRoute
   SalairesRoute: typeof SalairesRoute
   StatistiquesRoute: typeof StatistiquesRoute
   UtilisateursRoute: typeof UtilisateursRoute
@@ -246,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/salaires'
       fullPath: '/salaires'
       preLoaderRoute: typeof SalairesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rapports-financiers': {
+      id: '/rapports-financiers'
+      path: '/rapports-financiers'
+      fullPath: '/rapports-financiers'
+      preLoaderRoute: typeof RapportsFinanciersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rapports': {
@@ -325,6 +358,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ElevesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/depenses': {
+      id: '/depenses'
+      path: '/depenses'
+      fullPath: '/depenses'
+      preLoaderRoute: typeof DepensesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -337,6 +377,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DepensesRoute: DepensesRoute,
   ElevesRoute: ElevesRoute,
   EvaluationsRoute: EvaluationsRoute,
   MessagerieRoute: MessagerieRoute,
@@ -348,6 +389,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfilRoute: ProfilRoute,
   ProfilsContratsRoute: ProfilsContratsRoute,
   RapportsRoute: RapportsRoute,
+  RapportsFinanciersRoute: RapportsFinanciersRoute,
   SalairesRoute: SalairesRoute,
   StatistiquesRoute: StatistiquesRoute,
   UtilisateursRoute: UtilisateursRoute,

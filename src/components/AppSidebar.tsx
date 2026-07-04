@@ -2,7 +2,7 @@ import { Link, useLocation } from "@tanstack/react-router";
 import {
   LayoutDashboard, Users, CreditCard, UserCog, Wallet, ClipboardCheck,
   BarChart3, FileText, Settings, LogOut, GraduationCap, User, BookOpen, Sliders, MessageCircle,
-  IdCard, LineChart,
+  IdCard, LineChart, Receipt, TrendingUp,
 } from "lucide-react";
 import { useSchoolDisplayName, useSchoolLogo } from "@/hooks/useSchoolName";
 import { getRoleLabel, logoutUser } from "@/lib/auth";
@@ -25,6 +25,8 @@ const allNavItems = [
   { icon: BookOpen, label: "Notes", to: "/notes", roles: ["dg", "de"] },
   { icon: BarChart3, label: "Statistiques", to: "/statistiques", roles: ["dg", "de"] },
   { icon: FileText, label: "Rapports", to: "/rapports", roles: ["dg", "de", "gestionnaire", "comptable"] },
+  { icon: Receipt, label: "Dépenses", to: "/depenses", roles: ["dg", "comptable"] },
+  { icon: TrendingUp, label: "Rapports financiers", to: "/rapports-financiers", roles: ["dg", "comptable"] },
   { icon: Settings, label: "Utilisateurs", to: "/utilisateurs", roles: ["dg"] },
   { icon: Sliders, label: "Paramètres", to: "/parametres", roles: ["dg"] },
   { icon: User, label: "Mon Profil", to: "/profil", roles: ["dg", "de", "gestionnaire", "comptable"] },
