@@ -24,7 +24,7 @@ export function RapportsFinanciersModule() {
   };
 
   const { recettes, charges, byCat, byMonth } = useMemo(() => {
-    const paidPayments = payments.filter((p) => p.status === "paye" && inScope(p.date));
+    const paidPayments = payments.filter((p) => p.status === "payé" && inScope(p.date));
     const paidExpenses = expenses.filter((e) => e.statut === "paye" && inScope(e.date_depense));
 
     const recettes = paidPayments.reduce((s, p) => s + Number(p.montant || 0), 0);
@@ -38,7 +38,7 @@ export function RapportsFinanciersModule() {
     const byMonth: { month: string; rec: number; ch: number }[] = [];
     for (let m = 1; m <= 12; m++) {
       const key = `${yr}-${String(m).padStart(2, "0")}`;
-      const rec = payments.filter((p) => p.status === "paye" && p.date.startsWith(key)).reduce((s, p) => s + Number(p.montant), 0);
+      const rec = payments.filter((p) => p.status === "payé" && p.date.startsWith(key)).reduce((s, p) => s + Number(p.montant), 0);
       const ch = expenses.filter((e) => e.statut === "paye" && e.date_depense.startsWith(key)).reduce((s, e) => s + Number(e.montant), 0);
       if (rec || ch) byMonth.push({ month: key, rec, ch });
     }
