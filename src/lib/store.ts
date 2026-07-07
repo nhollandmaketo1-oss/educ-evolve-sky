@@ -1,6 +1,7 @@
 import { db, wipeLocalData } from "./offlineDb";
 import { queueChange } from "./syncEngine";
 import { supabase } from "@/integrations/supabase/client";
+import { ensureParentUser } from "@/lib/auth";
 
 export interface Student {
   id: string;
@@ -12,6 +13,7 @@ export interface Student {
   status: "actif" | "inactif";
   montant_inscription: number;
   frais_scolaire: number;
+  parent_user_id?: string | null;
 }
 
 export interface Personnel {
@@ -95,6 +97,8 @@ export async function getStudents(): Promise<Student[]> {
 
 export async function addStudent(s: Omit<Student, "id">): Promise<Student | null> {
   const id = uuid();
+  // Auto-créer le compte parent à partir du numéro de téléphone
+  const parentUserId = await ensureParentUser(s.contact_parent, `${s.prenom} ${s.nom}`);
   const record = {
     id,
     nom: s.nom,
@@ -105,12 +109,20 @@ export async function addStudent(s: Omit<Student, "id">): Promise<Student | null
     status: s.status,
     montant_inscription: s.montant_inscription,
     frais_scolaire: s.frais_scolaire,
+    parent_user_id: parentUserId,
     _synced: false,
     _updated_at: now(),
   };
   await db.students.add(record);
   await queueChange("students", "insert", id, record);
   await addNotification({ message: `Nouvel élève inscrit: ${s.prenom} ${s.nom} en ${s.classe}`, target_role: "dg", read: false });
+  if (parentUserId) {
+    await addNotification({
+      message: `Bienvenue ! Votre compte parent est actif. Identifiant : votre numéro de téléphone. Mot de passe par défaut : 2026.`,
+      target_role: `parent:${parentUserId}`,
+      read: false,
+    });
+  }
   return { ...record } as unknown as Student;
 }
 
