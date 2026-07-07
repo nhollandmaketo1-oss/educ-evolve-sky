@@ -1,17 +1,14 @@
 import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/offlineDb";
 
-/** Race a promise against a timeout — rejects if the promise doesn't settle in time */
 function withTimeout<T>(promise: PromiseLike<T>, ms = 5000): Promise<T> {
   return Promise.race([
     Promise.resolve(promise),
-    new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("timeout")), ms)
-    ),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("timeout")), ms)),
   ]);
 }
 
-export type UserRole = "dg" | "de" | "gestionnaire" | "comptable";
+export type UserRole = "dg" | "de" | "gestionnaire" | "comptable" | "parent";
 
 export interface AppUser {
   id: string;
@@ -24,7 +21,6 @@ export interface AppUser {
   telephone?: string | null;
 }
 
-// Session stored in memory (client-side only)
 let currentUserId: string | null = null;
 
 export function initSession() {
@@ -32,7 +28,11 @@ export function initSession() {
   currentUserId = sessionStorage.getItem("educ_current_user");
 }
 
-/** Cache a user locally in Dexie for offline access */
+/** Normalize phone → digits only (used as parent username). */
+export function normalizePhone(raw: string | null | undefined): string {
+  return (raw || "").replace(/\D+/g, "");
+}
+
 async function cacheUserLocally(user: AppUser) {
   try {
     await db.app_users.put({ ...user, _synced: true, _updated_at: new Date().toISOString() });
@@ -42,41 +42,35 @@ async function cacheUserLocally(user: AppUser) {
 }
 
 export async function authenticate(username: string, password: string): Promise<AppUser | null> {
-  // Try Supabase first
-  try {
-    const { data, error } = await withTimeout(
-      supabase
-        .from("app_users")
-        .select("*")
-        .eq("username", username)
-        .eq("password", password)
-        .maybeSingle()
-    );
-    if (!error && data) {
-      const user = mapUser(data);
-      await cacheUserLocally(user);
-      return user;
-    }
-  } catch {
-    // Network error — try offline
+  const normalized = normalizePhone(username);
+  const candidates = normalized && normalized !== username ? [username, normalized] : [username];
+
+  for (const uname of candidates) {
+    try {
+      const { data, error } = await withTimeout(
+        supabase.from("app_users").select("*").eq("username", uname).eq("password", password).maybeSingle()
+      );
+      if (!error && data) {
+        const user = mapUser(data);
+        await cacheUserLocally(user);
+        return user;
+      }
+    } catch { /* offline */ }
   }
 
-  // Fallback: check Dexie
-  const local = await db.app_users.where("username").equals(username).first();
-  if (local && local.password === password) {
-    return mapUser(local as unknown as Record<string, unknown>);
+  // Offline fallback
+  for (const uname of candidates) {
+    const local = await db.app_users.where("username").equals(uname).first();
+    if (local && local.password === password) return mapUser(local as unknown as Record<string, unknown>);
   }
   return null;
 }
 
 export async function getCurrentUserAsync(): Promise<AppUser | null> {
   if (typeof window === "undefined") return null;
-  if (!currentUserId) {
-    currentUserId = sessionStorage.getItem("educ_current_user");
-  }
+  if (!currentUserId) currentUserId = sessionStorage.getItem("educ_current_user");
   if (!currentUserId) return null;
 
-  // Try Supabase first
   try {
     const { data, error } = await withTimeout(
       supabase.from("app_users").select("*").eq("id", currentUserId).maybeSingle()
@@ -86,14 +80,10 @@ export async function getCurrentUserAsync(): Promise<AppUser | null> {
       await cacheUserLocally(user);
       return user;
     }
-  } catch {
-    // Network error — try offline
-  }
+  } catch { /* offline */ }
 
-  // Fallback: Dexie
   const local = await db.app_users.get(currentUserId);
   if (local) return mapUser(local as unknown as Record<string, unknown>);
-
   return null;
 }
 
@@ -107,7 +97,6 @@ export function loginUser(user: AppUser) {
   if (typeof window === "undefined") return;
   currentUserId = user.id;
   sessionStorage.setItem("educ_current_user", user.id);
-  // Also cache locally
   cacheUserLocally(user);
 }
 
@@ -130,14 +119,10 @@ export async function getAllUsers(): Promise<AppUser[]> {
     const { data } = await supabase.from("app_users").select("*").order("created_at");
     if (data) {
       const users = data.map(mapUser);
-      // Cache all users locally
       for (const u of users) await cacheUserLocally(u);
       return users;
     }
-  } catch {
-    // Offline
-  }
-  // Fallback
+  } catch { /* offline */ }
   const locals = await db.app_users.toArray();
   return locals.map((r) => mapUser(r as unknown as Record<string, unknown>));
 }
@@ -150,12 +135,39 @@ export async function createUser(user: { username: string; password: string; dis
   return created;
 }
 
+/**
+ * Ensure a parent user exists for a given phone number. Idempotent.
+ * Returns the parent's app_user id (or null if the phone is empty).
+ */
+export async function ensureParentUser(phoneRaw: string | null | undefined, displayName: string): Promise<string | null> {
+  const phone = normalizePhone(phoneRaw);
+  if (!phone) return null;
+  try {
+    const { data: existing } = await supabase
+      .from("app_users").select("id").eq("username", phone).maybeSingle();
+    if (existing?.id) return existing.id as string;
+    const { data: created, error } = await supabase.from("app_users").insert({
+      username: phone,
+      password: "2026",
+      role: "parent",
+      display_name: `Parent — ${displayName}`,
+      telephone: phone,
+    }).select("id").maybeSingle();
+    if (error) { console.warn("[Auth] ensureParentUser insert failed", error); return null; }
+    return created?.id as string ?? null;
+  } catch (e) {
+    console.warn("[Auth] ensureParentUser failed", e);
+    return null;
+  }
+}
+
 export function getRoleLabel(role: UserRole): string {
   switch (role) {
     case "dg": return "Directeur Général";
     case "de": return "Directeur d'Études";
     case "gestionnaire": return "Gestionnaire";
     case "comptable": return "Comptable";
+    case "parent": return "Parent";
   }
 }
 
