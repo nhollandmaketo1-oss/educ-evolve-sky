@@ -22,6 +22,7 @@ import { Route as ParametresRouteImport } from './routes/parametres'
 import { Route as PaiementsRouteImport } from './routes/paiements'
 import { Route as NotesRouteImport } from './routes/notes'
 import { Route as MessagerieRouteImport } from './routes/messagerie'
+import { Route as FraisScolariteRouteImport } from './routes/frais-scolarite'
 import { Route as EvaluationsRouteImport } from './routes/evaluations'
 import { Route as ElevesRouteImport } from './routes/eleves'
 import { Route as DepensesRouteImport } from './routes/depenses'
@@ -92,6 +93,11 @@ const MessagerieRoute = MessagerieRouteImport.update({
   path: '/messagerie',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FraisScolariteRoute = FraisScolariteRouteImport.update({
+  id: '/frais-scolarite',
+  path: '/frais-scolarite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EvaluationsRoute = EvaluationsRouteImport.update({
   id: '/evaluations',
   path: '/evaluations',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/depenses': typeof DepensesRoute
   '/eleves': typeof ElevesRoute
   '/evaluations': typeof EvaluationsRoute
+  '/frais-scolarite': typeof FraisScolariteRoute
   '/messagerie': typeof MessagerieRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/depenses': typeof DepensesRoute
   '/eleves': typeof ElevesRoute
   '/evaluations': typeof EvaluationsRoute
+  '/frais-scolarite': typeof FraisScolariteRoute
   '/messagerie': typeof MessagerieRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/depenses': typeof DepensesRoute
   '/eleves': typeof ElevesRoute
   '/evaluations': typeof EvaluationsRoute
+  '/frais-scolarite': typeof FraisScolariteRoute
   '/messagerie': typeof MessagerieRoute
   '/notes': typeof NotesRoute
   '/paiements': typeof PaiementsRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/depenses'
     | '/eleves'
     | '/evaluations'
+    | '/frais-scolarite'
     | '/messagerie'
     | '/notes'
     | '/paiements'
@@ -197,6 +207,7 @@ export interface FileRouteTypes {
     | '/depenses'
     | '/eleves'
     | '/evaluations'
+    | '/frais-scolarite'
     | '/messagerie'
     | '/notes'
     | '/paiements'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/depenses'
     | '/eleves'
     | '/evaluations'
+    | '/frais-scolarite'
     | '/messagerie'
     | '/notes'
     | '/paiements'
@@ -236,6 +248,7 @@ export interface RootRouteChildren {
   DepensesRoute: typeof DepensesRoute
   ElevesRoute: typeof ElevesRoute
   EvaluationsRoute: typeof EvaluationsRoute
+  FraisScolariteRoute: typeof FraisScolariteRoute
   MessagerieRoute: typeof MessagerieRoute
   NotesRoute: typeof NotesRoute
   PaiementsRoute: typeof PaiementsRoute
@@ -344,6 +357,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MessagerieRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/frais-scolarite': {
+      id: '/frais-scolarite'
+      path: '/frais-scolarite'
+      fullPath: '/frais-scolarite'
+      preLoaderRoute: typeof FraisScolariteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/evaluations': {
       id: '/evaluations'
       path: '/evaluations'
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   DepensesRoute: DepensesRoute,
   ElevesRoute: ElevesRoute,
   EvaluationsRoute: EvaluationsRoute,
+  FraisScolariteRoute: FraisScolariteRoute,
   MessagerieRoute: MessagerieRoute,
   NotesRoute: NotesRoute,
   PaiementsRoute: PaiementsRoute,

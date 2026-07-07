@@ -1,8 +1,10 @@
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginPage } from "@/components/LoginPage";
 import { AppSidebar } from "@/components/AppSidebar";
 import { TopBar } from "@/components/TopBar";
+import { ParentDashboard } from "@/components/ParentDashboard";
+import { generatePaymentReminders } from "@/lib/feesStore";
 
 interface AppLayoutProps {
   title: string;
@@ -14,11 +16,22 @@ export function AppLayout({ title, children, requireRole }: AppLayoutProps) {
   const { user, loading } = useAuth();
   const [mobileMenu, setMobileMenu] = useState(false);
 
+  // Déclenche la génération de rappels de paiement lors de la connexion DG/comptable/gestionnaire
+  useEffect(() => {
+    if (!user) return;
+    if (["dg", "comptable", "gestionnaire"].includes(user.role)) {
+      generatePaymentReminders().catch(() => { /* silent */ });
+    }
+  }, [user]);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Chargement...</p></div>;
   }
 
   if (!user) return <LoginPage />;
+
+  // Rôle parent → interface dédiée simplifiée
+  if (user.role === "parent") return <ParentDashboard />;
 
   if (requireRole && !requireRole.includes(user.role)) {
     return <div className="min-h-screen flex items-center justify-center bg-background"><p className="text-muted-foreground">Accès non autorisé</p></div>;

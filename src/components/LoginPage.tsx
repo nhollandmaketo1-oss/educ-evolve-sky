@@ -113,17 +113,35 @@ export function LoginPage() {
 
       {/* Login card */}
       <div className="relative z-10 bg-card rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <div className="flex flex-col items-center mb-6">
+        <div className="flex flex-col items-center mb-5">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
             <GraduationCap className="w-10 h-10 text-primary" />
           </div>
           <h1 className="text-3xl font-bold text-foreground font-[family-name:var(--font-display)]">EDUC 2.0</h1>
           <p className="text-muted-foreground text-sm mt-1">Système de Gestion Scolaire</p>
         </div>
+
+        {/* Rôles disponibles */}
+        <div className="mb-4 grid grid-cols-3 gap-1.5 text-[10px] text-center">
+          {[
+            { l: "DG", v: "DG001" },
+            { l: "Dir. Études", v: "DE002" },
+            { l: "Gestion.", v: "GES003" },
+            { l: "Comptable", v: "Compta004" },
+            { l: "Parent", v: "N° tél." },
+            { l: "Mot de passe", v: "2026" },
+          ].map((r) => (
+            <div key={r.l} className="rounded-lg bg-secondary/60 px-1.5 py-1">
+              <p className="font-semibold text-foreground">{r.l}</p>
+              <p className="text-muted-foreground">{r.v}</p>
+            </div>
+          ))}
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Nom d&apos;utilisateur</label>
-            <input type="text" value={username} onChange={(e) => { setUsername(e.target.value); setError(""); }} placeholder="Entrez votre identifiant" className="w-full px-4 py-3 rounded-xl bg-input text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary transition-all" />
+            <label className="block text-sm font-medium text-foreground mb-1.5">Identifiant / N° téléphone</label>
+            <input type="text" value={username} onChange={(e) => { setUsername(e.target.value); setError(""); }} placeholder="DG001, DE002, ou N° téléphone parent" className="w-full px-4 py-3 rounded-xl bg-input text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary transition-all" />
           </div>
           <div>
             <label className="block text-sm font-medium text-foreground mb-1.5">Mot de passe</label>
