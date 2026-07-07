@@ -112,6 +112,39 @@ export type Database = {
           },
         ]
       }
+      class_fees: {
+        Row: {
+          classe: string
+          created_at: string
+          devise: string
+          frais_inscription: number
+          frais_mensuel: number
+          id: string
+          mois_count: number
+          updated_at: string
+        }
+        Insert: {
+          classe: string
+          created_at?: string
+          devise?: string
+          frais_inscription?: number
+          frais_mensuel?: number
+          id?: string
+          mois_count?: number
+          updated_at?: string
+        }
+        Update: {
+          classe?: string
+          created_at?: string
+          devise?: string
+          frais_inscription?: number
+          frais_mensuel?: number
+          id?: string
+          mois_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contracts: {
         Row: {
           created_at: string
@@ -277,6 +310,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      invoices: {
+        Row: {
+          classe: string
+          created_at: string
+          date_echeance: string | null
+          date_emission: string
+          id: string
+          mois: string | null
+          montant: number
+          notes: string | null
+          numero: string
+          statut: string
+          student_id: string
+          type_frais: string
+          updated_at: string
+        }
+        Insert: {
+          classe: string
+          created_at?: string
+          date_echeance?: string | null
+          date_emission?: string
+          id?: string
+          mois?: string | null
+          montant?: number
+          notes?: string | null
+          numero: string
+          statut?: string
+          student_id: string
+          type_frais?: string
+          updated_at?: string
+        }
+        Update: {
+          classe?: string
+          created_at?: string
+          date_echeance?: string | null
+          date_emission?: string
+          id?: string
+          mois?: string | null
+          montant?: number
+          notes?: string | null
+          numero?: string
+          statut?: string
+          student_id?: string
+          type_frais?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -522,6 +603,7 @@ export type Database = {
           id: string
           montant_inscription: number | null
           nom: string
+          parent_user_id: string | null
           prenom: string
           status: string
         }
@@ -534,6 +616,7 @@ export type Database = {
           id?: string
           montant_inscription?: number | null
           nom: string
+          parent_user_id?: string | null
           prenom: string
           status?: string
         }
@@ -546,6 +629,7 @@ export type Database = {
           id?: string
           montant_inscription?: number | null
           nom?: string
+          parent_user_id?: string | null
           prenom?: string
           status?: string
         }
