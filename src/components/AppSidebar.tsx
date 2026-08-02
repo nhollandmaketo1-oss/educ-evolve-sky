@@ -48,35 +48,32 @@ export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
   };
 
   const sidebarContent = (
-    <aside className="flex flex-col bg-sidebar text-sidebar-foreground min-h-screen w-64">
-      <div className="flex flex-col items-center py-6 px-4 border-b border-sidebar-border">
-        <div className="w-14 h-14 rounded-full bg-sidebar-accent flex items-center justify-center mb-2 overflow-hidden">
+    <aside className="flex flex-col bg-sidebar text-sidebar-foreground h-screen w-60 shrink-0 overflow-hidden">
+      <div className="flex flex-col items-center py-3 px-3 border-b border-sidebar-border shrink-0">
+        <div className="w-10 h-10 rounded-full bg-sidebar-accent flex items-center justify-center mb-1.5 overflow-hidden shrink-0">
           {schoolLogo ? (
             <img src={schoolLogo} alt="Logo de l'école" className="w-full h-full object-contain" />
           ) : (
-            <GraduationCap className="w-7 h-7 text-sidebar-foreground" />
+            <GraduationCap className="w-5 h-5 text-sidebar-foreground" />
           )}
         </div>
-        <h2 className="font-bold text-lg font-[family-name:var(--font-display)] text-center leading-tight">{schoolName}</h2>
-        <p className="text-xs text-sidebar-foreground/70">{user ? getRoleLabel(user.role) : ""}</p>
+        <h2 className="font-bold text-sm font-[family-name:var(--font-display)] text-center leading-tight line-clamp-2">{schoolName}</h2>
+        <p className="text-[10px] text-sidebar-foreground/70">{user ? getRoleLabel(user.role) : ""}</p>
       </div>
-      <div className="px-4 pt-4 pb-1">
-        <span className="text-[10px] uppercase tracking-wider text-sidebar-foreground/50 font-semibold">Menu</span>
-      </div>
-      <nav className="flex-1 px-3 space-y-0.5">
+      <nav className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-2 py-2 space-y-0.5">
         {navItems.map((item) => {
           const isActive = location.pathname === item.to;
           return (
             <Link key={item.label} to={item.to} onClick={onClose}
-              className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${isActive ? "bg-sidebar-accent text-sidebar-foreground" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`}>
-              <item.icon className="w-4 h-4" />
-              {item.label}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-colors ${isActive ? "bg-sidebar-accent text-sidebar-foreground" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`}>
+              <item.icon className="w-4 h-4 shrink-0" />
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
       </nav>
-      <div className="p-4 border-t border-sidebar-border">
-        <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors">
+      <div className="p-2 border-t border-sidebar-border shrink-0">
+        <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors">
           <LogOut className="w-4 h-4" /> Déconnexion
         </button>
       </div>
@@ -85,7 +82,7 @@ export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
 
   return (
     <>
-      <div className="hidden md:flex">{sidebarContent}</div>
+      <div className="hidden md:flex sticky top-0 h-screen">{sidebarContent}</div>
       {mobileOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div className="absolute inset-0 bg-foreground/30" onClick={onClose} />
@@ -93,5 +90,30 @@ export function AppSidebar({ mobileOpen, onClose }: SidebarProps) {
         </div>
       )}
     </>
+  );
+}
+
+/** Barre de navigation horizontale scrollable (mobile) — affiche tous les modules du rôle. */
+export function MobileNavStrip() {
+  const location = useLocation();
+  const { user } = useAuth();
+  const role = user?.role || "gestionnaire";
+  const navItems = allNavItems.filter((item) => item.roles.includes(role));
+
+  return (
+    <div className="md:hidden border-b border-border bg-card">
+      <div className="flex gap-1.5 overflow-x-auto no-scrollbar px-2 py-1.5">
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.to;
+          return (
+            <Link key={item.label} to={item.to}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium whitespace-nowrap transition-colors ${isActive ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"}`}>
+              <item.icon className="w-3.5 h-3.5 shrink-0" />
+              {item.label}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
   );
 }
