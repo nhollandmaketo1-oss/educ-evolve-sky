@@ -121,22 +121,6 @@ export function LoginPage() {
           <p className="text-muted-foreground text-sm mt-1">Système de Gestion Scolaire</p>
         </div>
 
-        {/* Rôles disponibles */}
-        <div className="mb-4 grid grid-cols-3 gap-1.5 text-[10px] text-center">
-          {[
-            { l: "DG", v: "DG001" },
-            { l: "Dir. Études", v: "DE002" },
-            { l: "Gestion.", v: "GES003" },
-            { l: "Comptable", v: "Compta004" },
-            { l: "Parent", v: "N° tél." },
-            { l: "Mot de passe", v: "2026" },
-          ].map((r) => (
-            <div key={r.l} className="rounded-lg bg-secondary/60 px-1.5 py-1">
-              <p className="font-semibold text-foreground">{r.l}</p>
-              <p className="text-muted-foreground">{r.v}</p>
-            </div>
-          ))}
-        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
