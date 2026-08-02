@@ -100,6 +100,8 @@ export function loginUser(user: AppUser) {
   currentUserId = user.id;
   sessionStorage.setItem("educ_current_user", user.id);
   cacheUserLocally(user);
+  // synchronisation immédiate : la session serveur vient d'être créée
+  import("@/lib/syncEngine").then((m) => m.syncNow()).catch(() => {});
 }
 
 export function logoutUser() {
