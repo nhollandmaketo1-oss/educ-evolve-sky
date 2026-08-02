@@ -65,12 +65,11 @@ export async function deleteExpense(id: string): Promise<void> {
   await sdb.from("expenses").delete().eq("id", id);
 }
 
-// ─── Justificatif upload (public bucket school-assets) ───
+// ─── Justificatif upload (bucket privé staff-documents, URL signée) ───
 export async function uploadJustificatif(file: File): Promise<string | null> {
   const ext = file.name.split(".").pop() || "bin";
   const path = `expenses/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const { error } = await supabase.storage.from("school-assets").upload(path, file, { upsert: false });
-  if (error) { console.warn("[Expenses] upload", error); return null; }
-  const { data } = supabase.storage.from("school-assets").getPublicUrl(path);
-  return data.publicUrl;
+  const { url, error } = await uploadFile("staff-documents", path, file);
+  if (error || !url) { console.warn("[Expenses] upload", error); return null; }
+  return url;
 }

@@ -88,8 +88,7 @@ async function flushOnePending(msg: LocalMessage): Promise<void> {
       const path = `${msg.sender_id}/${Date.now()}-${msg.id}.${ext}`;
       const { url: uploadedUrl, error: upErr } = await uploadFile("message-attachments", path, msg._localBlob);
       if (upErr || !uploadedUrl) throw new Error(upErr || "upload failed");
-      const { data: urlData } = supabase.storage.from("message-attachments").getPublicUrl(path);
-      attachment_url = urlData.publicUrl;
+      attachment_url = uploadedUrl;
       attachment_name = msg.attachment_name;
     }
     const { data, error } = await sdb.from("messages").insert({
