@@ -1,6 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import type { DbSpec } from "@/lib/db.server";
 
+export interface RawUser {
+  id: string;
+  username: string;
+  role: string;
+  display_name: string;
+  photo: string | null;
+  poste: string | null;
+  telephone: string | null;
+  password?: string;
+}
+
 /** Generic, permission-checked data access. */
 export const dbRequest = createServerFn({ method: "POST" })
   .inputValidator((d: { token: string | null; spec: DbSpec }) => d)
@@ -25,7 +36,7 @@ export const authLogin = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!row) return { user: null, token: null };
     const token = await createSession(row.id as string, row.role as string);
-    return { user: row as Record<string, unknown>, token };
+    return { user: row as unknown as RawUser, token };
   });
 
 export const authLogout = createServerFn({ method: "POST" })
@@ -49,7 +60,7 @@ export const authSessionUser = createServerFn({ method: "POST" })
       .select("id, username, role, display_name, photo, poste, telephone")
       .eq("id", session.user_id)
       .maybeSingle();
-    return { user: (row as Record<string, unknown>) ?? null };
+    return { user: (row as unknown as RawUser) ?? null };
   });
 
 const BUCKET_WRITE_ROLES: Record<string, string[]> = {
