@@ -43,9 +43,9 @@ const ALL = [...STAFF, "parent"];
 /** read = roles allowed to select, write = roles allowed to insert/update/delete */
 const PERMISSIONS: Record<string, { read: string[]; write: string[] }> = {
   students: { read: [...STAFF, "parent"], write: ["dg", "de", "gestionnaire"] },
-  personnel: { read: ["dg", "de", "comptable"], write: ["dg", "de"] },
+  personnel: { read: ["dg", "de", "gestionnaire", "comptable"], write: ["dg", "de"] },
   payments: { read: [...STAFF, "parent"], write: ["dg", "gestionnaire", "comptable"] },
-  attendance: { read: ["dg", "de"], write: ["dg", "de"] },
+  attendance: { read: ["dg", "de", "gestionnaire", "comptable"], write: ["dg", "de"] },
   grades: { read: ["dg", "de", "parent"], write: ["dg", "de"] },
   notifications: { read: ALL, write: STAFF },
   app_settings: { read: ALL, write: ["dg"] },

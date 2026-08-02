@@ -144,6 +144,8 @@ async function pullAll() {
   for (const table of tables) {
     try {
       const { data, error } = await sdb.from(table).select("*");
+      // rôle sans droit de lecture sur cette table : on ignore silencieusement
+      if (error?.message?.includes("Accès refusé")) continue;
       if (error) throw error;
       if (!data) continue;
 
