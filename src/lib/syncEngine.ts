@@ -74,7 +74,7 @@ async function pushChanges() {
     try {
       const clean = cleanRecord(item.data);
       if (item.operation === "insert" && clean) {
-        const { error } = await sdb.from(item.table).upsert(clean);
+        const { error } = await sdb.from(item.table).upsert(clean as Record<string, unknown>);
         if (error) throw error;
       } else if (item.operation === "update" && clean) {
         const { data: serverRow } = await sdb.from(item.table)
@@ -89,7 +89,7 @@ async function pushChanges() {
             continue;
           }
         }
-        const { error } = await sdb.from(item.table).upsert(clean);
+        const { error } = await sdb.from(item.table).upsert(clean as Record<string, unknown>);
         if (error) throw error;
       } else if (item.operation === "delete") {
         const { error } = await sdb.from(item.table).delete().eq("id", item.record_id);
@@ -120,7 +120,7 @@ async function handleConflict(item: SyncQueueItem, serverRow: Record<string, unk
       resolveWith: async (choice) => {
         if (choice === "local") {
           const clean = cleanRecord(item.data);
-          await sdb.from(item.table).upsert(clean);
+          await sdb.from(item.table).upsert(clean as Record<string, unknown>);
         } else {
           const localTable = (db as any)[item.table];
           if (localTable) {

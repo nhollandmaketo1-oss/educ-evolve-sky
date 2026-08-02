@@ -19,12 +19,13 @@ export function setSessionToken(token: string | null) {
   else sessionStorage.removeItem(TOKEN_KEY);
 }
 
-export interface DbResult<T = unknown> {
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export interface DbResult<T = any> {
   data: T | null;
   error: { message: string } | null;
 }
 
-class Builder<T = unknown> implements PromiseLike<DbResult<T>> {
+class Builder<T = any> implements PromiseLike<DbResult<T>> {
   private spec: DbSpec;
 
   constructor(spec: DbSpec) {
