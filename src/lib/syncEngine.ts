@@ -1,5 +1,5 @@
 import { db, type SyncQueueItem } from "./offlineDb";
-import { sdb } from "@/lib/secureDb";
+import { sdb, getSessionToken } from "@/lib/secureDb";
 
 type SyncListener = (state: SyncState) => void;
 
@@ -157,6 +157,10 @@ async function pullAll() {
       for (const row of enriched) {
         const pk = table === "app_settings" ? row.key : row.id;
         const existing = await localTable.get(pk);
+        if (table === "app_users" && existing?.password && !row.password) {
+          // le serveur ne renvoie jamais les mots de passe : conserver le cache local (connexion hors ligne)
+          row.password = existing.password;
+        }
         if (!existing || existing._synced !== false) {
           await localTable.put(row);
         }
@@ -169,6 +173,7 @@ async function pullAll() {
 
 export async function syncNow() {
   if (state.syncing || !navigator.onLine) return;
+  if (!getSessionToken()) return; // pas de session : aucun accès serveur
 
   state.syncing = true;
   notify();
