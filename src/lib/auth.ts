@@ -1,5 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
 import { db } from "@/lib/offlineDb";
+import { sdb, setSessionToken, getSessionToken } from "@/lib/secureDb";
+import { authLogin, authLogout, authSessionUser } from "@/lib/data.functions";
 
 function withTimeout<T>(promise: PromiseLike<T>, ms = 5000): Promise<T> {
   return Promise.race([
@@ -35,7 +36,9 @@ export function normalizePhone(raw: string | null | undefined): string {
 
 async function cacheUserLocally(user: AppUser) {
   try {
-    await db.app_users.put({ ...user, _synced: true, _updated_at: new Date().toISOString() });
+    const existing = await db.app_users.get(user.id);
+    const password = user.password || (existing as unknown as AppUser | undefined)?.password || "";
+    await db.app_users.put({ ...user, password, _synced: true, _updated_at: new Date().toISOString() });
   } catch (e) {
     console.warn("[Auth] Failed to cache user locally:", e);
   }
@@ -47,18 +50,17 @@ export async function authenticate(username: string, password: string): Promise<
 
   for (const uname of candidates) {
     try {
-      const { data, error } = await withTimeout(
-        supabase.from("app_users").select("*").eq("username", uname).eq("password", password).maybeSingle()
-      );
-      if (!error && data) {
-        const user = mapUser(data);
-        await cacheUserLocally(user);
+      const res = await withTimeout(authLogin({ data: { username: uname, password } }));
+      if (res?.user && res.token) {
+        setSessionToken(res.token);
+        const user = mapUser(res.user as unknown as Record<string, unknown>);
+        await cacheUserLocally({ ...user, password });
         return user;
       }
     } catch { /* offline */ }
   }
 
-  // Offline fallback
+  // Offline fallback (credentials cached on this device at last successful login)
   for (const uname of candidates) {
     const local = await db.app_users.where("username").equals(uname).first();
     if (local && local.password === password) return mapUser(local as unknown as Record<string, unknown>);
@@ -71,16 +73,16 @@ export async function getCurrentUserAsync(): Promise<AppUser | null> {
   if (!currentUserId) currentUserId = sessionStorage.getItem("educ_current_user");
   if (!currentUserId) return null;
 
-  try {
-    const { data, error } = await withTimeout(
-      supabase.from("app_users").select("*").eq("id", currentUserId).maybeSingle()
-    );
-    if (!error && data) {
-      const user = mapUser(data);
-      await cacheUserLocally(user);
-      return user;
-    }
-  } catch { /* offline */ }
+  if (getSessionToken()) {
+    try {
+      const res = await withTimeout(authSessionUser({ data: { token: getSessionToken() } }));
+      if (res?.user) {
+        const user = mapUser(res.user as unknown as Record<string, unknown>);
+        await cacheUserLocally(user);
+        return user;
+      }
+    } catch { /* offline */ }
+  }
 
   const local = await db.app_users.get(currentUserId);
   if (local) return mapUser(local as unknown as Record<string, unknown>);
@@ -102,12 +104,15 @@ export function loginUser(user: AppUser) {
 
 export function logoutUser() {
   if (typeof window === "undefined") return;
+  const token = getSessionToken();
   currentUserId = null;
   sessionStorage.removeItem("educ_current_user");
+  setSessionToken(null);
+  if (token) { authLogout({ data: { token } }).catch(() => {}); }
 }
 
 export async function updateUser(userId: string, updates: { username?: string; password?: string; display_name?: string; photo?: string; poste?: string; telephone?: string }): Promise<AppUser | null> {
-  const { data, error } = await supabase.from("app_users").update(updates).eq("id", userId).select().maybeSingle();
+  const { data, error } = await sdb.from("app_users").update(updates).eq("id", userId).select().maybeSingle();
   if (error || !data) return null;
   const user = mapUser(data);
   await cacheUserLocally(user);
@@ -116,7 +121,7 @@ export async function updateUser(userId: string, updates: { username?: string; p
 
 export async function getAllUsers(): Promise<AppUser[]> {
   try {
-    const { data } = await supabase.from("app_users").select("*").order("created_at");
+    const { data } = await sdb.from("app_users").select("*").order("created_at");
     if (data) {
       const users = data.map(mapUser);
       for (const u of users) await cacheUserLocally(u);
@@ -128,7 +133,7 @@ export async function getAllUsers(): Promise<AppUser[]> {
 }
 
 export async function createUser(user: { username: string; password: string; display_name: string; role: UserRole; photo?: string | null; poste?: string; telephone?: string }): Promise<AppUser | null> {
-  const { data, error } = await supabase.from("app_users").insert(user).select().maybeSingle();
+  const { data, error } = await sdb.from("app_users").insert(user).select().maybeSingle();
   if (error || !data) return null;
   const created = mapUser(data);
   await cacheUserLocally(created);
@@ -143,10 +148,10 @@ export async function ensureParentUser(phoneRaw: string | null | undefined, disp
   const phone = normalizePhone(phoneRaw);
   if (!phone) return null;
   try {
-    const { data: existing } = await supabase
+    const { data: existing } = await sdb
       .from("app_users").select("id").eq("username", phone).maybeSingle();
     if (existing?.id) return existing.id as string;
-    const { data: created, error } = await supabase.from("app_users").insert({
+    const { data: created, error } = await sdb.from("app_users").insert({
       username: phone,
       password: "2026",
       role: "parent",
@@ -175,7 +180,7 @@ function mapUser(row: Record<string, unknown>): AppUser {
   return {
     id: row.id as string,
     username: row.username as string,
-    password: row.password as string,
+    password: (row.password as string) || "",
     role: row.role as UserRole,
     display_name: row.display_name as string,
     photo: row.photo as string | null,
