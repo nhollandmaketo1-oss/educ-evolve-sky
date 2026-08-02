@@ -2,7 +2,7 @@
  * Expenses store: dépenses et catégories.
  * Supabase-direct (no offline queue yet). Justificatifs uploadés dans le bucket public school-assets/expenses.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { sdb, uploadFile } from "@/lib/secureDb";
 
 export interface Expense {
   id: string;
@@ -28,41 +28,41 @@ export interface ExpenseCategory {
 
 // ─── Categories ───
 export async function getExpenseCategories(): Promise<ExpenseCategory[]> {
-  const { data, error } = await supabase.from("expense_categories").select("*").order("nom");
+  const { data, error } = await sdb.from("expense_categories").select("*").order("nom");
   if (error) { console.warn("[Expenses] getCategories", error); return []; }
   return (data || []) as ExpenseCategory[];
 }
 
 export async function addExpenseCategory(nom: string, description?: string): Promise<ExpenseCategory | null> {
-  const { data, error } = await supabase.from("expense_categories").insert({ nom, description: description || null }).select().maybeSingle();
+  const { data, error } = await sdb.from("expense_categories").insert({ nom, description: description || null }).select().maybeSingle();
   if (error) { console.warn("[Expenses] addCategory", error); return null; }
   return data as ExpenseCategory;
 }
 
 export async function deleteExpenseCategory(id: string): Promise<void> {
-  await supabase.from("expense_categories").delete().eq("id", id);
+  await sdb.from("expense_categories").delete().eq("id", id);
 }
 
 // ─── Expenses ───
 export async function getExpenses(): Promise<Expense[]> {
-  const { data, error } = await supabase.from("expenses").select("*").order("date_depense", { ascending: false });
+  const { data, error } = await sdb.from("expenses").select("*").order("date_depense", { ascending: false });
   if (error) { console.warn("[Expenses] getExpenses", error); return []; }
   return (data || []) as Expense[];
 }
 
 export async function addExpense(e: Omit<Expense, "id" | "created_at" | "updated_at">): Promise<Expense | null> {
-  const { data, error } = await supabase.from("expenses").insert(e).select().maybeSingle();
+  const { data, error } = await sdb.from("expenses").insert(e).select().maybeSingle();
   if (error) { console.warn("[Expenses] addExpense", error); return null; }
   return data as Expense;
 }
 
 export async function updateExpense(id: string, e: Partial<Expense>): Promise<void> {
-  const { error } = await supabase.from("expenses").update(e).eq("id", id);
+  const { error } = await sdb.from("expenses").update(e).eq("id", id);
   if (error) console.warn("[Expenses] updateExpense", error);
 }
 
 export async function deleteExpense(id: string): Promise<void> {
-  await supabase.from("expenses").delete().eq("id", id);
+  await sdb.from("expenses").delete().eq("id", id);
 }
 
 // ─── Justificatif upload (public bucket school-assets) ───

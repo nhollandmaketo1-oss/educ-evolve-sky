@@ -1,5 +1,5 @@
 import { db, type SyncQueueItem } from "./offlineDb";
-import { supabase } from "@/integrations/supabase/client";
+import { sdb } from "@/lib/secureDb";
 
 type SyncListener = (state: SyncState) => void;
 
@@ -74,10 +74,10 @@ async function pushChanges() {
     try {
       const clean = cleanRecord(item.data);
       if (item.operation === "insert" && clean) {
-        const { error } = await (supabase.from as any)(item.table).upsert(clean);
+        const { error } = await sdb.from(item.table).upsert(clean);
         if (error) throw error;
       } else if (item.operation === "update" && clean) {
-        const { data: serverRow } = await (supabase.from as any)(item.table)
+        const { data: serverRow } = await sdb.from(item.table)
           .select("*")
           .eq("id", item.record_id)
           .maybeSingle();
@@ -89,10 +89,10 @@ async function pushChanges() {
             continue;
           }
         }
-        const { error } = await (supabase.from as any)(item.table).upsert(clean);
+        const { error } = await sdb.from(item.table).upsert(clean);
         if (error) throw error;
       } else if (item.operation === "delete") {
-        const { error } = await (supabase.from as any)(item.table).delete().eq("id", item.record_id);
+        const { error } = await sdb.from(item.table).delete().eq("id", item.record_id);
         if (error) throw error;
       }
 
@@ -120,7 +120,7 @@ async function handleConflict(item: SyncQueueItem, serverRow: Record<string, unk
       resolveWith: async (choice) => {
         if (choice === "local") {
           const clean = cleanRecord(item.data);
-          await (supabase.from as any)(item.table).upsert(clean);
+          await sdb.from(item.table).upsert(clean);
         } else {
           const localTable = (db as any)[item.table];
           if (localTable) {
@@ -143,7 +143,7 @@ async function pullAll() {
 
   for (const table of tables) {
     try {
-      const { data, error } = await (supabase.from as any)(table).select("*");
+      const { data, error } = await sdb.from(table).select("*");
       if (error) throw error;
       if (!data) continue;
 

@@ -1,6 +1,6 @@
 import { db, wipeLocalData } from "./offlineDb";
 import { queueChange } from "./syncEngine";
-import { supabase } from "@/integrations/supabase/client";
+import { sdb, purgeBucket } from "@/lib/secureDb";
 import { ensureParentUser } from "@/lib/auth";
 
 export interface Student {
@@ -375,7 +375,7 @@ export async function resetAllData(): Promise<void> {
   const tables = ["students", "personnel", "payments", "attendance", "grades", "notifications", "messages"];
   for (const t of tables) {
     try {
-      await (supabase.from as unknown as (n: string) => { delete: () => { neq: (c: string, v: string) => Promise<unknown> } })(t)
+      await sdb.from(t)
         .delete()
         .neq("id", "00000000-0000-0000-0000-000000000000");
     } catch (e) {
@@ -383,19 +383,15 @@ export async function resetAllData(): Promise<void> {
     }
   }
   try {
-    await supabase.from("app_users").delete().not("username", "in", `(${PROTECTED_USERNAMES.map((u) => `"${u}"`).join(",")})`);
+    await sdb.from("app_users").delete().not("username", "in", `(${PROTECTED_USERNAMES.map((u) => `"${u}"`).join(",")})`);
   } catch (e) {
     console.warn("[Reset] failed clearing non-protected users", e);
   }
   try {
-    await supabase.from("app_settings").delete().neq("key", "school_name").neq("key", "school_logo");
+    await sdb.from("app_settings").delete().neq("key", "school_name").neq("key", "school_logo");
   } catch { /* */ }
   try {
-    const { data: files } = await supabase.storage.from("message-attachments").list("", { limit: 1000 });
-    if (files && files.length) {
-      const paths = files.map((f) => f.name);
-      await supabase.storage.from("message-attachments").remove(paths);
-    }
+    await purgeBucket("message-attachments");
   } catch { /* */ }
   await wipeLocalData();
 }
