@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSchoolName } from "@/hooks/useSchoolName";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadFile } from "@/lib/secureDb";
 import { Settings, School, Save, Trash2, Check, ImagePlus, Loader2 } from "lucide-react";
 
 export function ParametresModule() {
@@ -53,12 +53,9 @@ export function ParametresModule() {
     try {
       const ext = file.name.split(".").pop() || "png";
       const path = `logos/school-${Date.now()}.${ext}`;
-      const { error } = await supabase.storage
-        .from("school-assets")
-        .upload(path, file, { cacheControl: "3600", upsert: true });
-      if (error) throw error;
-      const { data } = supabase.storage.from("school-assets").getPublicUrl(path);
-      const url = `${data.publicUrl}?v=${Date.now()}`;
+      const { url: publicUrl, error } = await uploadFile("school-assets", path, file);
+      if (error || !publicUrl) throw new Error(error || "Échec du téléversement.");
+      const url = `${publicUrl}?v=${Date.now()}`;
       await setSchoolLogo(url);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);

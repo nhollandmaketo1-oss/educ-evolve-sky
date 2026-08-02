@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { getAllUsers, type AppUser } from "@/lib/auth";
 import { db } from "@/lib/offlineDb";
@@ -99,33 +98,17 @@ export default function MessagerieModule() {
     };
     window.addEventListener("online", onOnline);
 
-    const channel = supabase
-      .channel("messages-rt-" + currentUser.id)
-      .on("postgres_changes", { event: "*", schema: "public", table: "messages" }, async (payload) => {
-        const m = (payload.new || payload.old) as ChatMessage | undefined;
-        if (!m) return;
-        if (m.sender_id !== currentUser.id && m.receiver_id !== currentUser.id) return;
-        if (payload.eventType === "DELETE") {
-          await db.messages.delete(m.id);
-        } else {
-          const existing = await db.messages.get(m.id);
-          if (!existing || !existing._pending) {
-            await db.messages.put({ ...(payload.new as ChatMessage), _pending: false, _synced: true });
-          } else {
-            // local pending; merge read flag updates from server
-            await db.messages.put({ ...existing, read: (payload.new as ChatMessage).read });
-          }
-        }
-        loadConversations();
-        if (selectedUser && (m.sender_id === selectedUser.id || m.receiver_id === selectedUser.id)) {
-          loadMessages();
-        }
-      })
-      .subscribe();
+    // Les tables sont fermées au navigateur : on interroge le serveur périodiquement
+    const poll = setInterval(async () => {
+      if (!navigator.onLine) return;
+      await pullMessages(currentUser.id);
+      loadConversations();
+      loadMessages();
+    }, 5000);
 
     return () => {
       window.removeEventListener("online", onOnline);
-      supabase.removeChannel(channel);
+      clearInterval(poll);
     };
   }, [currentUser, selectedUser, loadConversations, loadMessages]);
 

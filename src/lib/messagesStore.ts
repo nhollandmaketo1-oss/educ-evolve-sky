@@ -1,5 +1,5 @@
 import { db, type LocalMessage } from "./offlineDb";
-import { supabase } from "@/integrations/supabase/client";
+import { sdb, uploadFile } from "@/lib/secureDb";
 
 function uuid() { return crypto.randomUUID(); }
 function nowIso() { return new Date().toISOString(); }
@@ -43,7 +43,7 @@ export async function sendText(senderId: string, receiverId: string, content: st
 
   if (navigator.onLine) {
     try {
-      const { data, error } = await supabase.from("messages").insert({
+      const { data, error } = await sdb.from("messages").insert({
         id, sender_id: senderId, receiver_id: receiverId,
         content, attachment_type: "text",
       }).select().maybeSingle();
@@ -86,15 +86,12 @@ async function flushOnePending(msg: LocalMessage): Promise<void> {
     if (msg._localBlob && msg.attachment_type && msg.attachment_type !== "text") {
       const ext = (msg.attachment_name || "bin").split(".").pop() || "bin";
       const path = `${msg.sender_id}/${Date.now()}-${msg.id}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("message-attachments")
-        .upload(path, msg._localBlob);
-      if (upErr) throw upErr;
-      const { data: urlData } = supabase.storage.from("message-attachments").getPublicUrl(path);
-      attachment_url = urlData.publicUrl;
+      const { url: uploadedUrl, error: upErr } = await uploadFile("message-attachments", path, msg._localBlob);
+      if (upErr || !uploadedUrl) throw new Error(upErr || "upload failed");
+      attachment_url = uploadedUrl;
       attachment_name = msg.attachment_name;
     }
-    const { data, error } = await supabase.from("messages").insert({
+    const { data, error } = await sdb.from("messages").insert({
       id: msg.id,
       sender_id: msg.sender_id,
       receiver_id: msg.receiver_id,
@@ -132,7 +129,7 @@ export async function flushPendingMessages(): Promise<number> {
 
 export async function markMessagesRead(senderId: string, receiverId: string) {
   // mark in Supabase (will broadcast via realtime) and locally
-  await supabase
+  await sdb
     .from("messages")
     .update({ read: true })
     .eq("sender_id", senderId)
@@ -149,7 +146,7 @@ export async function markMessagesRead(senderId: string, receiverId: string) {
 /** Pull all messages for current user, cache locally */
 export async function pullMessages(userId: string) {
   try {
-    const { data } = await supabase
+    const { data } = await sdb
       .from("messages")
       .select("*")
       .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)

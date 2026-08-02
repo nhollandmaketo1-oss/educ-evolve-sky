@@ -2,7 +2,7 @@
  * Frais de scolarité + factures.
  * Supabase-direct. Aussi utilitaires pour la génération des rappels de paiement.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { sdb } from "@/lib/secureDb";
 import { getStudents, addNotification, getPayments, type Student } from "@/lib/store";
 
 export interface ClassFee {
@@ -36,43 +36,43 @@ export const SCHOOL_MONTHS = [
 
 // ─── Class fees ───
 export async function getClassFees(): Promise<ClassFee[]> {
-  const { data, error } = await supabase.from("class_fees").select("*").order("classe");
+  const { data, error } = await sdb.from("class_fees").select("*").order("classe");
   if (error) { console.warn("[Fees] getClassFees", error); return []; }
   return (data || []) as ClassFee[];
 }
 
 export async function upsertClassFee(fee: Omit<ClassFee, "id">): Promise<ClassFee | null> {
-  const { data, error } = await supabase.from("class_fees")
+  const { data, error } = await sdb.from("class_fees")
     .upsert({ ...fee }, { onConflict: "classe" }).select().maybeSingle();
   if (error) { console.warn("[Fees] upsert", error); return null; }
   return data as ClassFee;
 }
 
 export async function deleteClassFee(id: string): Promise<void> {
-  await supabase.from("class_fees").delete().eq("id", id);
+  await sdb.from("class_fees").delete().eq("id", id);
 }
 
 // ─── Invoices ───
 export async function getInvoices(): Promise<Invoice[]> {
-  const { data, error } = await supabase.from("invoices").select("*").order("date_emission", { ascending: false });
+  const { data, error } = await sdb.from("invoices").select("*").order("date_emission", { ascending: false });
   if (error) { console.warn("[Fees] getInvoices", error); return []; }
   return (data || []) as Invoice[];
 }
 
 export async function addInvoice(i: Omit<Invoice, "id" | "numero"> & { numero?: string }): Promise<Invoice | null> {
   const numero = i.numero || `FAC-${Date.now().toString(36).toUpperCase()}`;
-  const { data, error } = await supabase.from("invoices").insert({ ...i, numero }).select().maybeSingle();
+  const { data, error } = await sdb.from("invoices").insert({ ...i, numero }).select().maybeSingle();
   if (error) { console.warn("[Fees] addInvoice", error); return null; }
   return data as Invoice;
 }
 
 export async function updateInvoice(id: string, i: Partial<Invoice>): Promise<void> {
-  const { error } = await supabase.from("invoices").update(i).eq("id", id);
+  const { error } = await sdb.from("invoices").update(i).eq("id", id);
   if (error) console.warn("[Fees] updateInvoice", error);
 }
 
 export async function deleteInvoice(id: string): Promise<void> {
-  await supabase.from("invoices").delete().eq("id", id);
+  await sdb.from("invoices").delete().eq("id", id);
 }
 
 /**
@@ -134,7 +134,7 @@ export async function generatePaymentReminders(): Promise<number> {
 
     const key = `RAPPEL-${yearMonth}-${s.id}`;
     // Anti-doublon via notifications récentes (message contient la clé)
-    const { data: dup } = await supabase.from("notifications").select("id").ilike("message", `%${key}%`).limit(1);
+    const { data: dup } = await sdb.from("notifications").select("id").ilike("message", `%${key}%`).limit(1);
     if (dup && dup.length) continue;
 
     await addNotification({
