@@ -1,7 +1,7 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { LoginPage } from "@/components/LoginPage";
-import { AppSidebar } from "@/components/AppSidebar";
+import { AppSidebar, MobileNavStrip } from "@/components/AppSidebar";
 import { TopBar } from "@/components/TopBar";
 import { ParentDashboard } from "@/components/ParentDashboard";
 import { generatePaymentReminders } from "@/lib/feesStore";
