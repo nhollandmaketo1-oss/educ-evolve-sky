@@ -42,7 +42,8 @@ export function AppLayout({ title, children, requireRole }: AppLayoutProps) {
       <AppSidebar mobileOpen={mobileMenu} onClose={() => setMobileMenu(false)} />
       <div className="flex-1 flex flex-col min-w-0">
         <TopBar title={title} onMenuToggle={() => setMobileMenu(!mobileMenu)} />
-        <main className="flex-1 p-4 md:p-6 overflow-auto">{children}</main>
+        <MobileNavStrip />
+        <main className="flex-1 min-w-0 p-3 md:p-5 overflow-x-hidden">{children}</main>
       </div>
     </div>
   );
