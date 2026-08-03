@@ -148,48 +148,6 @@ export function LoginPage() {
       </div>
 
       <p className="relative z-10 mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
-
-      {/* 3D credits bottom-right */}
-      <div className="absolute bottom-2 right-3 z-10 flex flex-col items-end text-right select-none">
-        <span
-          className="text-xs font-extrabold tracking-wider"
-          style={{
-            color: "#87CEEB",
-            WebkitTextStroke: "0.5px #FFD700",
-            textShadow:
-              "0 1px 0 #1a3a6e, 0 2px 0 #14305c, 0 3px 0 #0f2549, 0 3px 4px rgba(0,0,0,0.55), 0 0 2px #ffffff",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          PROPULSÉ PAR
-        </span>
-        <span
-          className="text-[10px] font-extrabold italic tracking-wide"
-          style={{
-            color: "#bfe3ff",
-            WebkitTextStroke: "0.5px #ffffff",
-            textShadow:
-              "0 1px 0 #15366a, 0 2px 0 #102a55, 0 3px 0 #0a1f40, 0 3px 5px rgba(0,0,0,0.6), 0 0 2px #FFD700",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          Oliver Fix Service — DU 2 JUIN 2026
-        </span>
-      </div>
-
-      {/* Version bottom-left */}
-      <span
-        className="absolute bottom-2 left-3 z-10 text-[10px] font-bold tracking-widest"
-        style={{
-          background: "linear-gradient(90deg, #C0C0C0 0%, #FFD700 50%, #C0C0C0 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          textShadow: "0 1px 1px rgba(0,0,0,0.4)",
-        }}
-      >
-        V 04.03.90
-      </span>
     </div>
   );
 }
