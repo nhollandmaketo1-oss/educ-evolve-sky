@@ -1,5 +1,5 @@
 import { db, type SyncQueueItem } from "./offlineDb";
-import { sdb, getSessionToken } from "@/lib/secureDb";
+import { sdb } from "@/lib/secureDb";
 
 type SyncListener = (state: SyncState) => void;
 
