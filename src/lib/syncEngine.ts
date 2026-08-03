@@ -1,5 +1,5 @@
 import { db, type SyncQueueItem } from "./offlineDb";
-import { sdb, getSessionToken } from "@/lib/secureDb";
+import { sdb } from "@/lib/secureDb";
 
 type SyncListener = (state: SyncState) => void;
 
@@ -175,7 +175,7 @@ async function pullAll() {
 
 export async function syncNow() {
   if (state.syncing || !navigator.onLine) return;
-  if (!getSessionToken()) return; // pas de session : aucun accès serveur
+  if (typeof window !== "undefined" && !sessionStorage.getItem("educ_current_user")) return; // pas d'utilisateur connecté
 
   state.syncing = true;
   notify();
