@@ -16,24 +16,28 @@ function playWelcomeSound() {
     master.gain.exponentialRampToValueAtTime(0.0001, now + 3);
     master.connect(ctx.destination);
 
-    // Petite symphonie: arpège majestueux Do-Mi-Sol-Do (3s)
+    // Sonnerie de démarrage type Samsung : carillon cristallin ascendant
     const notes: Array<{ f: number; t: number; d: number }> = [
-      { f: 523.25, t: 0.00, d: 0.7 },  // C5
-      { f: 659.25, t: 0.35, d: 0.7 },  // E5
-      { f: 783.99, t: 0.70, d: 0.9 },  // G5
-      { f: 1046.5, t: 1.05, d: 1.8 },  // C6 (tenu)
-      { f: 392.00, t: 1.05, d: 1.8 },  // G4 (basse)
-      { f: 261.63, t: 1.05, d: 1.8 },  // C4 (fondamentale)
+      { f: 1174.66, t: 0.00, d: 0.5 },  // D6
+      { f: 1567.98, t: 0.14, d: 0.5 },  // G6
+      { f: 1975.53, t: 0.28, d: 0.6 },  // B6
+      { f: 2349.32, t: 0.42, d: 1.6 },  // D7 (brillance finale)
+      { f: 783.99, t: 0.42, d: 1.8 },   // G5 (corps)
+      { f: 391.99, t: 0.42, d: 2.0 },   // G4 (basse douce)
     ];
 
     notes.forEach(({ f, t, d }) => {
-      ["triangle", "sine"].forEach((type, i) => {
+      // Timbre de cloche : fondamentale sinus + partiel métallique léger
+      [
+        { type: "sine" as OscillatorType, mul: 1, gain: 0.35 },
+        { type: "sine" as OscillatorType, mul: 2.76, gain: 0.08 },
+      ].forEach(({ type, mul, gain }) => {
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
-        osc.type = type as OscillatorType;
-        osc.frequency.value = f * (i === 1 ? 2 : 1);
+        osc.type = type;
+        osc.frequency.value = f * mul;
         g.gain.setValueAtTime(0.0001, now + t);
-        g.gain.exponentialRampToValueAtTime(i === 1 ? 0.15 : 0.4, now + t + 0.04);
+        g.gain.exponentialRampToValueAtTime(gain, now + t + 0.012);
         g.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
         osc.connect(g);
         g.connect(master);
@@ -144,48 +148,6 @@ export function LoginPage() {
       </div>
 
       <p className="relative z-10 mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
-
-      {/* 3D credits bottom-right */}
-      <div className="absolute bottom-2 right-3 z-10 flex flex-col items-end text-right select-none">
-        <span
-          className="text-xs font-extrabold tracking-wider"
-          style={{
-            color: "#87CEEB",
-            WebkitTextStroke: "0.5px #FFD700",
-            textShadow:
-              "0 1px 0 #1a3a6e, 0 2px 0 #14305c, 0 3px 0 #0f2549, 0 3px 4px rgba(0,0,0,0.55), 0 0 2px #ffffff",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          PROPULSÉ PAR
-        </span>
-        <span
-          className="text-[10px] font-extrabold italic tracking-wide"
-          style={{
-            color: "#bfe3ff",
-            WebkitTextStroke: "0.5px #ffffff",
-            textShadow:
-              "0 1px 0 #15366a, 0 2px 0 #102a55, 0 3px 0 #0a1f40, 0 3px 5px rgba(0,0,0,0.6), 0 0 2px #FFD700",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          Oliver Fix Service — DU 2 JUIN 2026
-        </span>
-      </div>
-
-      {/* Version bottom-left */}
-      <span
-        className="absolute bottom-2 left-3 z-10 text-[10px] font-bold tracking-widest"
-        style={{
-          background: "linear-gradient(90deg, #C0C0C0 0%, #FFD700 50%, #C0C0C0 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-          textShadow: "0 1px 1px rgba(0,0,0,0.4)",
-        }}
-      >
-        V 04.03.90
-      </span>
     </div>
   );
 }
