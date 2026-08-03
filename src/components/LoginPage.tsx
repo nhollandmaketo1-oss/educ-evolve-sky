@@ -16,24 +16,28 @@ function playWelcomeSound() {
     master.gain.exponentialRampToValueAtTime(0.0001, now + 3);
     master.connect(ctx.destination);
 
-    // Petite symphonie: arpège majestueux Do-Mi-Sol-Do (3s)
+    // Sonnerie de démarrage type Samsung : carillon cristallin ascendant
     const notes: Array<{ f: number; t: number; d: number }> = [
-      { f: 523.25, t: 0.00, d: 0.7 },  // C5
-      { f: 659.25, t: 0.35, d: 0.7 },  // E5
-      { f: 783.99, t: 0.70, d: 0.9 },  // G5
-      { f: 1046.5, t: 1.05, d: 1.8 },  // C6 (tenu)
-      { f: 392.00, t: 1.05, d: 1.8 },  // G4 (basse)
-      { f: 261.63, t: 1.05, d: 1.8 },  // C4 (fondamentale)
+      { f: 1174.66, t: 0.00, d: 0.5 },  // D6
+      { f: 1567.98, t: 0.14, d: 0.5 },  // G6
+      { f: 1975.53, t: 0.28, d: 0.6 },  // B6
+      { f: 2349.32, t: 0.42, d: 1.6 },  // D7 (brillance finale)
+      { f: 783.99, t: 0.42, d: 1.8 },   // G5 (corps)
+      { f: 391.99, t: 0.42, d: 2.0 },   // G4 (basse douce)
     ];
 
     notes.forEach(({ f, t, d }) => {
-      ["triangle", "sine"].forEach((type, i) => {
+      // Timbre de cloche : fondamentale sinus + partiel métallique léger
+      [
+        { type: "sine" as OscillatorType, mul: 1, gain: 0.35 },
+        { type: "sine" as OscillatorType, mul: 2.76, gain: 0.08 },
+      ].forEach(({ type, mul, gain }) => {
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
-        osc.type = type as OscillatorType;
-        osc.frequency.value = f * (i === 1 ? 2 : 1);
+        osc.type = type;
+        osc.frequency.value = f * mul;
         g.gain.setValueAtTime(0.0001, now + t);
-        g.gain.exponentialRampToValueAtTime(i === 1 ? 0.15 : 0.4, now + t + 0.04);
+        g.gain.exponentialRampToValueAtTime(gain, now + t + 0.012);
         g.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
         osc.connect(g);
         g.connect(master);
