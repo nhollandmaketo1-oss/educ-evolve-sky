@@ -175,7 +175,7 @@ async function pullAll() {
 
 export async function syncNow() {
   if (state.syncing || !navigator.onLine) return;
-  if (!getSessionToken()) return; // pas de session : aucun accès serveur
+  if (typeof window !== "undefined" && !sessionStorage.getItem("educ_current_user")) return; // pas d'utilisateur connecté
 
   state.syncing = true;
   notify();
