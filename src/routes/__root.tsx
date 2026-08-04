@@ -59,15 +59,17 @@ export const Route = createRootRoute({
       {
         children: `(() => {
   const removeBadge = () => {
-    document.querySelectorAll('a[href*="lovable.dev"]').forEach((el) => {
-      (el.closest('div') || el).remove();
+    document.querySelectorAll('a[href*="lovable.dev"], [id^="lovable-badge"]').forEach((el) => {
+      const host = el.closest('[id^="lovable-badge"]') || el.closest('div') || el;
+      host.remove();
     });
   };
   window.addEventListener('load', removeBadge);
   document.addEventListener('DOMContentLoaded', () => {
     removeBadge();
-    new MutationObserver(removeBadge).observe(document.body, { childList: true, subtree: true });
+    new MutationObserver(removeBadge).observe(document.documentElement, { childList: true, subtree: true });
   });
+  removeBadge();
 })();`,
       },
     ],
