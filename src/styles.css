@@ -123,13 +123,21 @@
 }
 
 /* Masquer le badge externe */
+#lovable-badge,
+#lovable-badge-cta,
+#lovable-badge-text,
+#lovable-badge-divider,
+#lovable-badge-close,
+[id^="lovable-badge"],
 a[href*="lovable.dev"],
-div:has(> a[href*="lovable.dev"]) {
+div:has(> a[href*="lovable.dev"]),
+div:has(> [id^="lovable-badge"]) {
   display: none !important;
   opacity: 0 !important;
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
 
 @utility no-scrollbar {
   scrollbar-width: none;
