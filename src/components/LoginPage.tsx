@@ -62,10 +62,7 @@ export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
   const { isInstalled, promptInstall } = usePwaInstall();
-  const installUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/install`
-      : "https://educ-evolve-sky.lovable.app/install";
+  const installUrl = "https://educ-evolve-sky.lovable.app/install";
 
 
 
