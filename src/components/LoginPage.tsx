@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { GraduationCap, Eye, EyeOff } from "lucide-react";
+import { QRCode } from "react-qr-code";
 import { authenticate, loginUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 import loginBg from "@/assets/login-bg.jpg.asset.json";
@@ -81,7 +82,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 pb-24 overflow-hidden">
       {/* Background image at 40% opacity */}
       <div
         aria-hidden
@@ -147,7 +148,21 @@ export function LoginPage() {
         </form>
       </div>
 
-      <p className="relative z-10 mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
+      <p className="absolute bottom-4 left-4 z-20 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
+
+      {/* QR code — télécharger l'application */}
+      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-xl p-2.5 shadow-lg border border-white/50">
+        <QRCode
+          value="https://educ-evolve-sky.lovable.app"
+          size={72}
+          bgColor="transparent"
+          fgColor="#0F172A"
+          level="M"
+        />
+        <span className="text-[10px] font-medium text-foreground/80 text-center leading-tight">
+          Scanner pour<br />télécharger l'app
+        </span>
+      </div>
     </div>
   );
 }
