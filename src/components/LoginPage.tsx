@@ -148,7 +148,7 @@ export function LoginPage() {
         </form>
       </div>
 
-      <p className="relative z-10 mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
+      <p className="absolute bottom-4 left-4 z-20 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
 
       {/* QR code — télécharger l'application */}
       <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-xl p-2.5 shadow-lg border border-white/50">
