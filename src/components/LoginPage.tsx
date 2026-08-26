@@ -61,6 +61,13 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const { isInstalled, promptInstall } = usePwaInstall();
+  const installUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/install`
+      : "https://educ-evolve-sky.lovable.app/install";
+
+
 
   useEffect(() => {
     if (!showWelcome) return;
