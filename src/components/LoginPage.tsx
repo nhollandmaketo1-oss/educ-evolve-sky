@@ -68,6 +68,13 @@ export function LoginPage() {
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showWelcome]);
 
+  const handleInstall = async () => {
+    const res = await promptInstall();
+    if (res === "unavailable") {
+      window.location.href = "/install";
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -80,6 +87,7 @@ export function LoginPage() {
     }
     setLoading(false);
   };
+
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 pb-24 overflow-hidden">
