@@ -82,7 +82,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 overflow-hidden">
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 pb-24 overflow-hidden">
       {/* Background image at 40% opacity */}
       <div
         aria-hidden
