@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Eye, EyeOff } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Download } from "lucide-react";
 import { QRCode } from "react-qr-code";
 import { authenticate, loginUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 import loginBg from "@/assets/login-bg.jpg.asset.json";
+
 
 function playWelcomeSound() {
   try {
