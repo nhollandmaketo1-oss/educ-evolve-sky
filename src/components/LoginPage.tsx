@@ -150,19 +150,28 @@ export function LoginPage() {
 
       <p className="absolute bottom-4 left-4 z-20 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
 
-      {/* QR code — télécharger l'application */}
+      {/* QR code + bouton d'installation */}
       <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-xl p-2.5 shadow-lg border border-white/50">
         <QRCode
-          value="https://educ-evolve-sky.lovable.app"
+          value={installUrl}
           size={72}
           bgColor="transparent"
           fgColor="#0F172A"
           level="M"
         />
         <span className="text-[10px] font-medium text-foreground/80 text-center leading-tight">
-          Scanner pour<br />télécharger l'app
+          Scanner pour<br />installer l'app
         </span>
+        <button
+          type="button"
+          onClick={handleInstall}
+          className="w-full flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-[11px] font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          <Download className="w-3.5 h-3.5" />
+          {isInstalled ? "App installée" : "Télécharger l'app"}
+        </button>
       </div>
+
     </div>
   );
 }
