@@ -149,6 +149,20 @@ export function LoginPage() {
       </div>
 
       <p className="relative z-10 mt-6 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
+
+      {/* QR code — télécharger l'application */}
+      <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-xl p-2.5 shadow-lg border border-white/50">
+        <QRCode
+          value="https://educ-evolve-sky.lovable.app"
+          size={72}
+          bgColor="transparent"
+          fgColor="#0F172A"
+          level="M"
+        />
+        <span className="text-[10px] font-medium text-foreground/80 text-center leading-tight">
+          Scanner pour<br />télécharger l'app
+        </span>
+      </div>
     </div>
   );
 }
