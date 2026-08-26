@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, Eye, EyeOff } from "lucide-react";
+import { GraduationCap, Eye, EyeOff, Download } from "lucide-react";
 import { QRCode } from "react-qr-code";
 import { authenticate, loginUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
+import { usePwaInstall } from "@/hooks/usePwaInstall";
 import loginBg from "@/assets/login-bg.jpg.asset.json";
+
 
 function playWelcomeSound() {
   try {
@@ -59,6 +61,10 @@ export function LoginPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
+  const { isInstalled, promptInstall } = usePwaInstall();
+  const installUrl = "https://educ-evolve-sky.lovable.app/install";
+
+
 
   useEffect(() => {
     if (!showWelcome) return;
@@ -67,6 +73,13 @@ export function LoginPage() {
     const t2 = setTimeout(() => setShowWelcome(false), 3800);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [showWelcome]);
+
+  const handleInstall = async () => {
+    const res = await promptInstall();
+    if (res === "unavailable") {
+      window.location.href = "/install";
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,6 +93,7 @@ export function LoginPage() {
     }
     setLoading(false);
   };
+
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center bg-primary px-4 pb-24 overflow-hidden">
@@ -150,19 +164,28 @@ export function LoginPage() {
 
       <p className="absolute bottom-4 left-4 z-20 text-primary-foreground/80 text-sm font-medium">MAKETO NHOLLAND</p>
 
-      {/* QR code — télécharger l'application */}
+      {/* QR code + bouton d'installation */}
       <div className="absolute bottom-4 right-4 z-20 flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-sm rounded-xl p-2.5 shadow-lg border border-white/50">
         <QRCode
-          value="https://educ-evolve-sky.lovable.app"
+          value={installUrl}
           size={72}
           bgColor="transparent"
           fgColor="#0F172A"
           level="M"
         />
         <span className="text-[10px] font-medium text-foreground/80 text-center leading-tight">
-          Scanner pour<br />télécharger l'app
+          Scanner pour<br />installer l'app
         </span>
+        <button
+          type="button"
+          onClick={handleInstall}
+          className="w-full flex items-center justify-center gap-1 rounded-lg bg-primary px-2 py-1.5 text-[11px] font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
+        >
+          <Download className="w-3.5 h-3.5" />
+          {isInstalled ? "App installée" : "Télécharger l'app"}
+        </button>
       </div>
+
     </div>
   );
 }
