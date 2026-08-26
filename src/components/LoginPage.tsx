@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { GraduationCap, Eye, EyeOff } from "lucide-react";
+import { QRCode } from "react-qr-code";
 import { authenticate, loginUser } from "@/lib/auth";
 import { useAuth } from "@/hooks/useAuth";
 import loginBg from "@/assets/login-bg.jpg.asset.json";
